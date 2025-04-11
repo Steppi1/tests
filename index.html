@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio Map</title>
-  
-  <!-- CSS incluso direttamente nel file HTML -->
+  <title>Scrollable Color Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     html, body {
       margin: 0;
@@ -14,77 +13,61 @@
     }
 
     #map {
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
     }
 
-    .image-marker {
-      pointer-events: none;
+    .tile-box {
       width: 100%;
       height: 100%;
-    }
-
-    .image-square {
-      width: 100%;
-      height: 100%;
-      background-color: red; /* Default color */
-      border: 2px solid black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 20px;
+      border: 2px solid white;
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
 
-  <!-- JavaScript incluso direttamente nel file HTML -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Creazione della mappa
     const map = L.map('map', {
-      crs: L.CRS.Simple, // Usa CRS semplice per le immagini
-      minZoom: -2,
+      crs: L.CRS.Simple,
+      minZoom: -3,
       maxZoom: 4,
-      zoomSnap: 0.1,
-      zoomDelta: 0.25,
-      zoomControl: true,
-      attributionControl: false,
-      worldCopyJump: true // Ripetizione "infinita"
+      worldCopyJump: true,
+      zoomControl: true
     });
 
-    // Dimensioni della mappa
-    const mapSize = 5000; // Mappa di 5000x5000 px
-    const tileSize = 300; // Dimensione "immagine" in px
-    map.setView([mapSize / 2, mapSize / 2], 0); // Inizializza la vista al centro
+    const tileSize = 200;
+    const gridWidth = 5;
+    const gridHeight = 5;
+    const totalSize = tileSize * gridWidth;
 
-    // Impostazione dei limiti della mappa
-    const bounds = [[0, 0], [mapSize, mapSize]];
-    map.setMaxBounds(bounds);
+    map.setView([totalSize / 2, totalSize / 2], 0);
+    map.setMaxBounds([[0, 0], [totalSize, totalSize]]);
 
-    // Numero di "immagini" da mostrare
-    const numImages = 50; // Numero totale di quadrati colorati
-    const imagesPerRow = 10; // Quante immagini per riga
+    const colors = ['red', 'green', 'blue', 'purple', 'orange', 'teal', 'brown', 'gray', 'pink'];
 
-    // Creazione di quadrati colorati
-    for (let i = 0; i < numImages; i++) {
-      const row = Math.floor(i / imagesPerRow);
-      const col = i % imagesPerRow;
+    for (let row = 0; row < gridHeight; row++) {
+      for (let col = 0; col < gridWidth; col++) {
+        const y = row * tileSize;
+        const x = col * tileSize;
 
-      // Posizione base
-      let x = col * tileSize;
-      let y = row * tileSize;
+        const color = colors[(row * gridWidth + col) % colors.length];
 
-      // Posizione "random" per il test
-      x += Math.random() * mapSize / 2;
-      y += Math.random() * mapSize / 2;
+        const icon = L.divIcon({
+          className: '',
+          iconSize: [tileSize, tileSize],
+          html: `<div class="tile-box" style="background:${color};">${row},${col}</div>`
+        });
 
-      // Crea un quadrato colorato in CSS
-      const divIcon = L.divIcon({
-        className: 'image-marker',
-        html: `<div class="image-square" style="background-color: ${i % 2 === 0 ? 'red' : 'green'};"></div>`,
-        iconSize: [tileSize, tileSize] // Dimensione dell'elemento
-      });
-
-      // Aggiungi il quadrato alla mappa
-      L.marker([y + tileSize / 2, x + tileSize / 2], { icon: divIcon }).addTo(map);
+        L.marker([y + tileSize / 2, x + tileSize / 2], { icon }).addTo(map);
+      }
     }
   </script>
 </body>
