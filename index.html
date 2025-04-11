@@ -36,7 +36,6 @@
     .tile {
       position: absolute;
       width: 300px;
-      margin: 10px;
       user-select: none;
       pointer-events: none;
     }
@@ -66,24 +65,26 @@
       return images[Math.floor(Math.random() * images.length)];
     }
 
-    const spacing = 300 + 20; // 300 width + 10px margin on each side
-    const totalTilesPerRow = Math.floor(Math.sqrt((2 * gridSize + 1) ** 2));
-    const half = Math.floor(totalTilesPerRow / 2);
+    const tileWidth = 300;
+    const margin = 10;
+    const spacing = tileWidth + margin; // spazio tra le immagini
+    const tilesPerSide = 2 * gridSize + 1;
 
-    let i = 0;
-    for (let y = -half; y <= half; y++) {
-      for (let x = -half; x <= half; x++) {
+    for (let row = 0; row < tilesPerSide; row++) {
+      for (let col = 0; col < tilesPerSide; col++) {
+        const x = col - gridSize;
+        const y = row - gridSize;
+
         const tile = document.createElement('div');
         tile.className = 'tile';
-        tile.style.left = `${x * spacing}px`;
-        tile.style.top = `${y * spacing}px`;
+
+        tile.style.left = `${x * (tileWidth + margin)}px`;
+        tile.style.top = `${y * (tileWidth + margin)}px`;
 
         const img = document.createElement('img');
         img.src = randomImage();
         tile.appendChild(img);
         panzoomEl.appendChild(tile);
-
-        i++;
       }
     }
 
