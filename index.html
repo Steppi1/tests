@@ -75,6 +75,18 @@
       return images[Math.floor(Math.random() * images.length)];
     }
 
+    let scale = 2.5;
+    let originX = 0;
+    let originY = 0;
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+
+    function updateTransform() {
+      panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
+      panzoomEl.style.transformOrigin = "0 0";
+    }
+
     for (let y = 0; y < gridCount; y++) {
       for (let x = 0; x < gridCount; x++) {
         const tile = document.createElement('div');
@@ -86,8 +98,8 @@
         img.onload = () => {
           if (!panzoomEl.dataset.ready) {
             panzoomEl.dataset.ready = 'true';
-            originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
-            originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
+            originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth * scale / 2);
+            originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight * scale / 2);
             panzoomEl.style.visibility = 'visible';
             updateTransform();
           }
@@ -96,18 +108,6 @@
         tile.appendChild(img);
         panzoomEl.appendChild(tile);
       }
-    }
-
-    let scale = 2.5;
-    let originX = 0;
-    let originY = 0;
-    let isPanning = false;
-    let startX = 0;
-    let startY = 0;
-
-    function updateTransform() {
-      panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
-      panzoomEl.style.transformOrigin = "0 0";
     }
 
     wrapper.addEventListener('wheel', (e) => {
