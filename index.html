@@ -15,6 +15,7 @@
       user-select: none;
       touch-action: none;
     }
+
     #wrapper {
       display: flex;
       align-items: center;
@@ -25,19 +26,22 @@
       position: relative;
       cursor: grab;
     }
+
     #panzoom {
       display: grid;
-      gap: 10px;
-      padding: 10px;
+      padding: 0;
       position: absolute;
       top: 0;
       left: 0;
       user-select: none;
       pointer-events: auto;
       visibility: hidden;
-      box-sizing: content-box;
+      box-sizing: border-box;
     }
+
     .tile {
+      padding: 5px;
+      box-sizing: border-box;
       background: transparent;
       width: 100%;
       height: 100%;
@@ -45,6 +49,7 @@
       align-items: center;
       justify-content: center;
     }
+
     .tile img {
       width: 100%;
       height: 100%;
@@ -59,8 +64,8 @@
       #panzoom {
         grid-template-columns: repeat(21, 200px);
         grid-template-rows: repeat(21, 200px);
-        width: calc((200px + 10px) * 21);
-        height: calc((200px + 10px) * 21);
+        width: calc(200px * 21);
+        height: calc(200px * 21);
       }
     }
 
@@ -68,8 +73,8 @@
       #panzoom {
         grid-template-columns: repeat(21, 400px);
         grid-template-rows: repeat(21, 400px);
-        width: calc((400px + 10px) * 21);
-        height: calc((400px + 10px) * 21);
+        width: calc(400px * 21);
+        height: calc(400px * 21);
       }
     }
   </style>
@@ -83,7 +88,7 @@
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
-    const gridCount = 21; // sempre dispari per avere un centro
+    const gridCount = 21;
 
     function randomImage() {
       return images[Math.floor(Math.random() * images.length)];
@@ -129,7 +134,6 @@
       }
     }
 
-    // Zoom scroll
     wrapper.addEventListener('wheel', (e) => {
       e.preventDefault();
       const rect = wrapper.getBoundingClientRect();
@@ -145,7 +149,6 @@
       updateTransform();
     }, { passive: false });
 
-    // Pan
     wrapper.addEventListener('pointerdown', (e) => {
       if (e.pointerType === 'touch' && e.isPrimary === false) return;
       isPanning = true;
@@ -167,7 +170,6 @@
       wrapper.style.cursor = 'grab';
     });
 
-    // Touch zoom
     let lastTouchDist = null;
     let lastTouchCenter = null;
 
@@ -210,7 +212,6 @@
       }
     });
 
-    // Recenter on resize
     window.addEventListener('resize', () => {
       setTimeout(centerView, 100);
     });
