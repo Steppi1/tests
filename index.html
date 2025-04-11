@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio Infinite Map</title>
+  <title>Color Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     html, body {
@@ -11,17 +11,15 @@
       height: 100%;
       overflow: hidden;
     }
-
     #map {
       width: 100vw;
       height: 100vh;
     }
-
     .tile {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       color: white;
       border: 2px solid white;
@@ -43,20 +41,20 @@
       worldCopyJump: true
     });
 
-    const tileCount = 30;      // griglia 30x30
-    const baseTileSize = 200;  // dimensione base per i quadrati
-
+    const tileCount = 20; // griglia 20x20
+    const baseTileSize = 200;
     const mapSize = tileCount * baseTileSize;
+
     map.setView([mapSize / 2, mapSize / 2], 0);
     map.setMaxBounds([[0, 0], [mapSize, mapSize]]);
 
-    const colors = ['red', 'green', 'blue', 'purple', 'orange', 'teal', 'brown', 'black', 'gray', 'pink'];
+    const colors = ['red', 'green', 'blue', 'orange', 'purple', 'teal', 'brown', 'black', 'gray', 'pink'];
 
     for (let row = 0; row < tileCount; row++) {
       for (let col = 0; col < tileCount; col++) {
-        // Dimensioni variabili
-        const w = baseTileSize + (row % 3) * 50;
-        const h = baseTileSize + (col % 2) * 50;
+        const w = baseTileSize + (col % 3) * 40;
+        const h = baseTileSize + (row % 2) * 40;
+
         const x = col * baseTileSize;
         const y = row * baseTileSize;
         const color = colors[(row * tileCount + col) % colors.length];
@@ -65,10 +63,13 @@
           className: '',
           iconSize: [w, h],
           iconAnchor: [w / 2, h / 2],
-          html: `<div class="tile" style="background:${color}; width:${w}px; height:${h}px">${row},${col}</div>`
+          html: `<div class="tile" style="width:${w}px; height:${h}px; background:${color}">${row},${col}</div>`
         });
 
-        L.marker([y + h / 2, x + w / 2], { icon: divIcon, interactive: false }).addTo(map);
+        L.marker([y + h / 2, x + w / 2], {
+          icon: divIcon,
+          interactive: false
+        }).addTo(map);
       }
     }
   </script>
