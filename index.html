@@ -28,8 +28,9 @@
       position: absolute;
       top: 0;
       left: 0;
-      display: grid;
-      grid-auto-flow: dense;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
       user-select: none;
       pointer-events: auto;
       visibility: hidden;
@@ -71,18 +72,22 @@
       for (let y = -gridSize; y <= gridSize; y++) {
         const tile = document.createElement('div');
         tile.className = 'tile';
-        tile.style.gridColumn = x + gridSize + 1;
-        tile.style.gridRow = y + gridSize + 1;
-
+        
         const img = document.createElement('img');
         img.src = randomImage();
 
         img.onload = () => {
-          const aspectRatio = img.naturalWidth / img.naturalHeight;
-          tile.style.width = `${256 * aspectRatio}px`;
-          tile.style.height = `256px`;
-          updateTransform();
-        };
+  const aspectRatio = img.naturalWidth / img.naturalHeight;
+  tile.style.width = `${256 * aspectRatio}px`;
+  tile.style.height = `${256 / aspectRatio}px`;
+  if (!panzoomEl.dataset.ready) {
+    panzoomEl.dataset.ready = 'true';
+    originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
+    originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
+    panzoomEl.style.visibility = 'visible';
+    updateTransform();
+  }
+};
 
         tile.appendChild(img);
         panzoomEl.appendChild(tile);
@@ -179,12 +184,7 @@
       }
     });
 
-    window.onload = () => {
-      originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
-      originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
-      panzoomEl.style.visibility = 'visible';
-      updateTransform();
-    };
+    
   </script>
 </body>
 </html>
