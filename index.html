@@ -108,8 +108,9 @@
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
+  // Permetti il pan anche su mobile con un solo dito
   if (e.pointerType === 'touch' && e.isPrimary === false) return;
-  if (e.pointerType === 'touch' && e.width > 0 && e.height > 0 && e.pressure === 0) return;
+  if (e.touches && e.touches.length > 1) return;
 
   isPanning = true;
   startX = e.clientX - originX;
