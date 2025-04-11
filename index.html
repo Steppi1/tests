@@ -106,7 +106,7 @@
     // Zoom iniziale più alto su desktop
     window.addEventListener('load', () => {
       const isDesktop = window.innerWidth >= 768;
-      scale = isDesktop ? 2.5 : 1;
+      scale = isDesktop ? 3 : 1;
 
       originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth * scale / 2);
       originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight * scale / 2);
