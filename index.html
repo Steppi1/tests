@@ -22,14 +22,15 @@
 
     #grid {
       position: absolute;
-      top: 0;
-      left: 0;
-      transform-origin: top left;
+      display: flex;
+      flex-wrap: wrap;
+      transition: transform 0.1s ease-out;
     }
 
-    .tile {
-      position: absolute;
-      box-sizing: border-box;
+    .image {
+      object-fit: cover;
+      border: 2px solid transparent;
+      pointer-events: none; /* Rende le immagini non cliccabili */
     }
   </style>
 </head>
@@ -39,150 +40,81 @@
   </div>
 
   <script>
-    const grid = document.getElementById('grid');
-    const tileSize = 100;
-    const rows = 10;
-    const cols = 10;
-    const colors = ['red', 'green', 'blue', 'purple', 'orange'];
+    // Dimensione della griglia e delle immagini
+    const gridSize = 5000;  // dimensione totale della griglia (5000x5000 px)
+    const numImages = 50;   // numero di immagini
+    const minZoom = 0.5;    // zoom minimo
+    const maxZoom = 2;      // zoom massimo
+    let currentZoom = 1;    // zoom iniziale
 
-    const tiles = [];
-    let yOffset = 0;
+    const gridElement = document.getElementById('grid');
 
-    // Prepara le dimensioni per ogni colonna, per allineare correttamente i tile
-    const columnWidths = Array(cols).fill(0);
-    const rowHeights = Array(rows).fill(0);
-    const tileData = [];
+    // Funzione per caricare dinamicamente le immagini
+    function loadImages() {
+      for (let i = 0; i < numImages; i++) {
+        const img = document.createElement('img');
+        img.classList.add('image');
+        
+        // Posizionamento casuale delle immagini in griglia
+        const imgWidth = Math.random() * 200 + 100;  // larghezza casuale
+        const imgHeight = Math.random() * 200 + 100; // altezza casuale
+        const xPos = Math.random() * (gridSize - imgWidth);
+        const yPos = Math.random() * (gridSize - imgHeight);
 
-    for (let y = 0; y < rows; y++) {
-      let xOffset = 0;
-      for (let x = 0; x < cols; x++) {
-        const w = tileSize + (Math.floor(Math.random() * 3) * 40);
-        const h = tileSize + (Math.floor(Math.random() * 3) * 40);
-        const color = colors[(x + y) % colors.length];
+        img.src = `imgs/img${i + 1}.png`; // Percorso immagine dalla cartella 'imgs'
+        img.style.width = `${imgWidth}px`;
+        img.style.height = `${imgHeight}px`;
+        img.style.position = 'absolute';
+        img.style.left = `${xPos}px`;
+        img.style.top = `${yPos}px`;
 
-        // Aggiorna larghezza colonna e altezza riga
-        columnWidths[x] = Math.max(columnWidths[x], w);
-        rowHeights[y] = Math.max(rowHeights[y], h);
-
-        tileData.push({ x, y, w, h, color });
+        gridElement.appendChild(img);
       }
     }
 
-    // Calcola le posizioni reali ora che abbiamo le misure finali
-    const colPositions = columnWidths.reduce((acc, w, i) => {
-      acc.push((acc[i - 1] || 0) + (i > 0 ? columnWidths[i - 1] : 0));
-      return acc;
-    }, []);
+    // Gestione dello zoom e del movimento
+    let isMouseDown = false;
+    let startX, startY, scrollLeft, scrollTop;
 
-    const rowPositions = rowHeights.reduce((acc, h, i) => {
-      acc.push((acc[i - 1] || 0) + (i > 0 ? rowHeights[i - 1] : 0));
-      return acc;
-    }, []);
-
-    // Genera i tile reali
-    tileData.forEach(({ x, y, w, h, color }) => {
-      const tile = document.createElement('div');
-      tile.className = 'tile';
-      tile.style.width = w + 'px';
-      tile.style.height = h + 'px';
-      tile.style.left = colPositions[x] + 'px';
-      tile.style.top = rowPositions[y] + 'px';
-      tile.style.background = color;
-      tile.innerText = `${w}x${h}`;
-      tile.style.color = 'white';
-      tile.style.display = 'flex';
-      tile.style.alignItems = 'center';
-      tile.style.justifyContent = 'center';
-      tile.style.fontFamily = 'sans-serif';
-      grid.appendChild(tile);
-      tiles.push(tile);
+    document.getElementById('viewport').addEventListener('mousedown', (e) => {
+      isMouseDown = true;
+      startX = e.pageX - gridElement.offsetLeft;
+      startY = e.pageY - gridElement.offsetTop;
+      scrollLeft = gridElement.scrollLeft;
+      scrollTop = gridElement.scrollTop;
+      document.body.style.cursor = 'grabbing';
     });
 
-    // Zoom e movimento
-    let scale = 1.5; // Zoom iniziale meno esagerato
-    let origin = { x: -300, y: -200 }; // posizione iniziale centrata
-    let isDragging = false;
-    let dragStart = { x: 0, y: 0 };
-    let scrollStart = { x: 0, y: 0 };
+    document.addEventListener('mouseup', () => {
+      isMouseDown = false;
+      document.body.style.cursor = 'grab';
+    });
 
-    const updateTransform = () => {
-      grid.style.transform = `translate(${origin.x}px, ${origin.y}px) scale(${scale})`;
-    };
-
-    updateTransform();
-
-    document.getElementById('viewport').addEventListener('wheel', e => {
+    document.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
       e.preventDefault();
-      const zoomIntensity = 0.05; // Ridotto l'intensità dello zoom
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
-
-      const gridRect = grid.getBoundingClientRect();
-      const offsetX = (mouseX - gridRect.left) / scale;
-      const offsetY = (mouseY - gridRect.top) / scale;
-
-      const delta = -e.deltaY * zoomIntensity;
-      const newScale = Math.max(0.2, Math.min(5, scale + delta));
-
-      // calcola la nuova origine per mantenere il punto sotto al cursore fisso
-      origin.x -= offsetX * (newScale - scale);
-      origin.y -= offsetY * (newScale - scale);
-
-      scale = newScale;
-      updateTransform();
+      const x = e.pageX - gridElement.offsetLeft;
+      const y = e.pageY - gridElement.offsetTop;
+      const walkX = (x - startX) * 1;  // Velocità di scorrimento orizzontale
+      const walkY = (y - startY) * 1;  // Velocità di scorrimento verticale
+      gridElement.scrollLeft = scrollLeft - walkX;
+      gridElement.scrollTop = scrollTop - walkY;
     });
 
-    document.getElementById('viewport').addEventListener('mousedown', e => {
-      isDragging = true;
-      dragStart = { x: e.clientX, y: e.clientY };
-      scrollStart = { x: origin.x, y: origin.y };
+    // Gestione dello zoom
+    gridElement.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomDirection = e.deltaY < 0 ? 1 : -1;
+      const newZoom = currentZoom + zoomDirection * 0.1;
+      currentZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+
+      // Applica lo zoom
+      gridElement.style.transform = `scale(${currentZoom})`;
     });
 
-    window.addEventListener('mouseup', () => isDragging = false);
-    window.addEventListener('mousemove', e => {
-      if (!isDragging) return;
-      origin.x = scrollStart.x + (e.clientX - dragStart.x);
-      origin.y = scrollStart.y + (e.clientY - dragStart.y);
-      updateTransform();
-    });
+    // Inizializza la mappa
+    loadImages();
 
-    // 🔁 Griglia infinita (moltiplica le tiles virtualmente)
-    function replicateGrid(times = 1) {
-      const baseWidth = colPositions[cols - 1] + columnWidths[cols - 1];
-      const baseHeight = rowPositions[rows - 1] + rowHeights[rows - 1];
-
-      for (let i = -times; i <= times; i++) {
-        for (let j = -times; j <= times; j++) {
-          if (i === 0 && j === 0) continue; // skip the original
-          tileData.forEach(({ x, y, w, h, color }) => {
-            const tile = document.createElement('div');
-            tile.className = 'tile';
-            tile.style.width = w + 'px';
-            tile.style.height = h + 'px';
-            tile.style.left = (colPositions[x] + i * baseWidth) + 'px';
-            tile.style.top = (rowPositions[y] + j * baseHeight) + 'px';
-            tile.style.background = color;
-            tile.style.display = 'flex';
-            tile.style.alignItems = 'center';
-            tile.style.justifyContent = 'center';
-            tile.style.color = 'white';
-            tile.style.fontFamily = 'sans-serif';
-            grid.appendChild(tile);
-          });
-        }
-      }
-    }
-
-    // Aggiungi ripetizione quando ci si avvicina ai bordi
-    const viewport = document.getElementById('viewport');
-    viewport.addEventListener('mousemove', () => {
-      const gridRect = grid.getBoundingClientRect();
-      const viewportRect = viewport.getBoundingClientRect();
-
-      if (gridRect.right - viewportRect.left < 300 || gridRect.bottom - viewportRect.top < 300) {
-        replicateGrid(1); // Aggiungi ripetizione se ci avviciniamo al bordo
-      }
-    });
   </script>
 </body>
 </html>
