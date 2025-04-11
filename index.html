@@ -28,12 +28,14 @@
     #panzoom {
       display: grid;
       gap: 10px;
+      padding: 10px; /* equidistanza dai bordi */
       position: absolute;
       top: 0;
       left: 0;
       user-select: none;
       pointer-events: auto;
       visibility: hidden;
+      box-sizing: content-box;
     }
     .tile {
       background: transparent;
@@ -55,19 +57,19 @@
 
     @media (max-width: 768px) {
       #panzoom {
-        grid-template-columns: repeat(10, 200px);
-        grid-template-rows: repeat(10, 200px);
-        width: calc((200px + 10px) * 10 - 10px);
-        height: calc((200px + 10px) * 10 - 10px);
+        grid-template-columns: repeat(20, 200px);
+        grid-template-rows: repeat(20, 200px);
+        width: calc((200px + 10px) * 20);
+        height: calc((200px + 10px) * 20);
       }
     }
 
     @media (min-width: 769px) {
       #panzoom {
-        grid-template-columns: repeat(10, 400px);
-        grid-template-rows: repeat(10, 400px);
-        width: calc((400px + 10px) * 10 - 10px);
-        height: calc((400px + 10px) * 10 - 10px);
+        grid-template-columns: repeat(20, 400px);
+        grid-template-rows: repeat(20, 400px);
+        width: calc((400px + 10px) * 20);
+        height: calc((400px + 10px) * 20);
       }
     }
   </style>
@@ -81,13 +83,13 @@
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
-    const gridCount = 10;
+    const gridCount = 20;
 
     function randomImage() {
       return images[Math.floor(Math.random() * images.length)];
     }
 
-    let scale = 1;
+    let scale = 2;
     let originX = 0;
     let originY = 0;
     let isPanning = false;
