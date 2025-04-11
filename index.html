@@ -128,47 +128,46 @@
       wrapper.style.cursor = 'grab';
     });
 
-    // Touch pinch zoom with center movement
-    let lastTouchState = null;
-    wrapper.addEventListener('touchmove', (e) => {
-      if (e.touches.length === 2) {
-        e.preventDefault();
-        const rect = wrapper.getBoundingClientRect();
-        const [t1, t2] = e.touches;
+    // Touch pinch zoom REFACTOR
+let lastTouchDist = null;
+let lastCenter = null;
 
-        const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
-        const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
-        const dx = t1.clientX - t2.clientX;
-        const dy = t1.clientY - t2.clientY;
-        const dist = Math.hypot(dx, dy);
+wrapper.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const rect = wrapper.getBoundingClientRect();
 
-        if (lastTouchState) {
-          const lastDist = lastTouchState.dist;
-          const lastCenterX = lastTouchState.centerX;
-          const lastCenterY = lastTouchState.centerY;
+    const [t1, t2] = e.touches;
+    const dx = t1.clientX - t2.clientX;
+    const dy = t1.clientY - t2.clientY;
+    const dist = Math.hypot(dx, dy);
 
-          const scaleFactor = dist / lastDist;
-          const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
+    const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
+    const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
 
-          // zoom centrato
-          originX -= (centerX - originX) * (newScale / scale - 1);
-          originY -= (centerY - originY) * (newScale / scale - 1);
+    if (lastTouchDist !== null && lastCenter) {
+      const scaleFactor = dist / lastTouchDist;
+      const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
 
-          // pan basato sul movimento del centro
-          originX += centerX - lastCenterX;
-          originY += centerY - lastCenterY;
+      // correggi lo zoom rispetto al centro
+      originX += centerX - lastCenter.x;
+      originY += centerY - lastCenter.y;
+      originX -= (centerX - originX) * (newScale / scale - 1);
+      originY -= (centerY - originY) * (newScale / scale - 1);
 
-          scale = newScale;
-          updateTransform();
-        }
+      scale = newScale;
+      updateTransform();
+    }
 
-        lastTouchState = { centerX, centerY, dist };
-      }
-    }, { passive: false });
+    lastTouchDist = dist;
+    lastCenter = { x: centerX, y: centerY };
+  }
+}, { passive: false });
 
-    wrapper.addEventListener('touchend', () => {
-      lastTouchState = null;
-    });
+wrapper.addEventListener('touchend', () => {
+  lastTouchDist = null;
+  lastCenter = null;
+});
 
     updateTransform();
   </script>
