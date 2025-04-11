@@ -107,8 +107,9 @@
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
+  // Abilita pan anche su touch con un solo dito
   if (e.pointerType === 'touch' && e.isPrimary === false) return;
-  if (e.pointerType === 'touch' && navigator.maxTouchPoints > 1 && e.width > 0 && e.height > 0 && e.pressure === 0) return;
+  if (e.pointerType === 'touch' && e.touches && e.touches.length > 1) return;
 
   isPanning = true;
   startX = e.clientX - originX;
