@@ -31,12 +31,16 @@
     .tile {
       width: 256px;
       height: 256px;
+      user-select: none;
+      pointer-events: none;
     }
     .tile img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
+      user-select: none;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -85,21 +89,23 @@
 
     function updateTransform() {
       panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
+      panzoomEl.style.transformOrigin = "0 0";
     }
 
     wrapper.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const delta = -e.deltaY * 0.001;
       const rect = wrapper.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-      const offsetX = mouseX - originX;
-      const offsetY = mouseY - originY;
+      const prevScale = scale;
 
-      const newScale = Math.min(Math.max(0.1, scale * (1 + delta)), 5);
-      originX -= offsetX * (newScale / scale - 1);
-      originY -= offsetY * (newScale / scale - 1);
-      scale = newScale;
+      const delta = -e.deltaY * 0.001;
+      scale = Math.min(Math.max(0.1, scale * (1 + delta)), 5);
+
+      const scaleChange = scale / prevScale;
+      originX = mouseX - (mouseX - originX) * scaleChange;
+      originY = mouseY - (mouseY - originY) * scaleChange;
+
       updateTransform();
     }, { passive: false });
 
