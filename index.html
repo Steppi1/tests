@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Map of Images</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <title>Portfolio Map</title>
+  
+  <!-- CSS incluso direttamente nel file HTML -->
   <style>
     html, body {
       margin: 0;
@@ -24,7 +25,6 @@
     }
 
     .image-square {
-      display: block;
       width: 100%;
       height: 100%;
       background-color: red; /* Default color */
@@ -35,32 +35,35 @@
 <body>
   <div id="map"></div>
 
+  <!-- JavaScript incluso direttamente nel file HTML -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
+    // Creazione della mappa
     const map = L.map('map', {
-      crs: L.CRS.Simple,
+      crs: L.CRS.Simple, // Usa CRS semplice per le immagini
       minZoom: -2,
       maxZoom: 4,
       zoomSnap: 0.1,
       zoomDelta: 0.25,
       zoomControl: true,
       attributionControl: false,
-      worldCopyJump: true // loop infinito finto
+      worldCopyJump: true // Ripetizione "infinita"
     });
 
-    // Dimensione totale della "mappa"
-    const mapSize = 5000; // 5000x5000 px
-    const tileSize = 300;  // Dimensione "immagine"
-    map.setView([mapSize / 2, mapSize / 2], 0); // Posizione iniziale al centro della mappa
+    // Dimensioni della mappa
+    const mapSize = 5000; // Mappa di 5000x5000 px
+    const tileSize = 300; // Dimensione "immagine" in px
+    map.setView([mapSize / 2, mapSize / 2], 0); // Inizializza la vista al centro
 
-    // Limiti della mappa
+    // Impostazione dei limiti della mappa
     const bounds = [[0, 0], [mapSize, mapSize]];
     map.setMaxBounds(bounds);
 
-    const numImages = 50; // Numero di "immagini" da mostrare
+    // Numero di "immagini" da mostrare
+    const numImages = 50; // Numero totale di quadrati colorati
     const imagesPerRow = 10; // Quante immagini per riga
 
-    // Carica "immagini" e le piazza in una griglia
+    // Creazione di quadrati colorati
     for (let i = 0; i < numImages; i++) {
       const row = Math.floor(i / imagesPerRow);
       const col = i % imagesPerRow;
@@ -69,18 +72,18 @@
       let x = col * tileSize;
       let y = row * tileSize;
 
-      // Posizione "random" per il test (posizionamento su mappa)
+      // Posizione "random" per il test
       x += Math.random() * mapSize / 2;
       y += Math.random() * mapSize / 2;
 
-      // Crea l'elemento CSS quadrato
+      // Crea un quadrato colorato in CSS
       const divIcon = L.divIcon({
         className: 'image-marker',
         html: `<div class="image-square" style="background-color: ${i % 2 === 0 ? 'red' : 'green'};"></div>`,
-        iconSize: [tileSize, tileSize]
+        iconSize: [tileSize, tileSize] // Dimensione dell'elemento
       });
 
-      // Posiziona la "immagine" sulla mappa
+      // Aggiungi il quadrato alla mappa
       L.marker([y + tileSize / 2, x + tileSize / 2], { icon: divIcon }).addTo(map);
     }
   </script>
