@@ -28,7 +28,7 @@
     #panzoom {
       display: grid;
       gap: 10px;
-      padding: 10px; /* equidistanza dai bordi */
+      padding: 10px;
       position: absolute;
       top: 0;
       left: 0;
@@ -57,19 +57,19 @@
 
     @media (max-width: 768px) {
       #panzoom {
-        grid-template-columns: repeat(20, 200px);
-        grid-template-rows: repeat(20, 200px);
-        width: calc((200px + 10px) * 20);
-        height: calc((200px + 10px) * 20);
+        grid-template-columns: repeat(21, 200px);
+        grid-template-rows: repeat(21, 200px);
+        width: calc((200px + 10px) * 21);
+        height: calc((200px + 10px) * 21);
       }
     }
 
     @media (min-width: 769px) {
       #panzoom {
-        grid-template-columns: repeat(20, 400px);
-        grid-template-rows: repeat(20, 400px);
-        width: calc((400px + 10px) * 20);
-        height: calc((400px + 10px) * 20);
+        grid-template-columns: repeat(21, 400px);
+        grid-template-rows: repeat(21, 400px);
+        width: calc((400px + 10px) * 21);
+        height: calc((400px + 10px) * 21);
       }
     }
   </style>
@@ -83,13 +83,13 @@
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
-    const gridCount = 20;
+    const gridCount = 21; // sempre dispari per avere un centro
 
     function randomImage() {
       return images[Math.floor(Math.random() * images.length)];
     }
 
-    let scale = 2;
+    let scale = 3;
     let originX = 0;
     let originY = 0;
     let isPanning = false;
