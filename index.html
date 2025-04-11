@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Color Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Color Grid Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     html, body {
@@ -12,18 +12,18 @@
       overflow: hidden;
     }
     #map {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
     }
     .tile {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
       font-weight: bold;
       color: white;
       border: 2px solid white;
       box-sizing: border-box;
+      font-family: sans-serif;
     }
   </style>
 </head>
@@ -34,39 +34,40 @@
   <script>
     const map = L.map('map', {
       crs: L.CRS.Simple,
-      minZoom: -2,
-      maxZoom: 4,
+      minZoom: -3,
+      maxZoom: 3,
       zoomControl: true,
       attributionControl: false,
       worldCopyJump: true
     });
 
-    const tileCount = 20; // griglia 20x20
-    const baseTileSize = 200;
-    const mapSize = tileCount * baseTileSize;
+    const cols = 10;
+    const rows = 10;
+    const baseSize = 200;
+    const totalWidth = cols * baseSize;
+    const totalHeight = rows * baseSize;
 
-    map.setView([mapSize / 2, mapSize / 2], 0);
-    map.setMaxBounds([[0, 0], [mapSize, mapSize]]);
+    map.setView([totalHeight / 2, totalWidth / 2], 0);
+    map.setMaxBounds([[0, 0], [totalHeight, totalWidth]]);
 
-    const colors = ['red', 'green', 'blue', 'orange', 'purple', 'teal', 'brown', 'black', 'gray', 'pink'];
+    const colors = ['#FF4136', '#2ECC40', '#0074D9', '#FF851B', '#B10DC9', '#FFDC00', '#001f3f', '#39CCCC', '#85144b', '#AAAAAA'];
 
-    for (let row = 0; row < tileCount; row++) {
-      for (let col = 0; col < tileCount; col++) {
-        const w = baseTileSize + (col % 3) * 40;
-        const h = baseTileSize + (row % 2) * 40;
-
-        const x = col * baseTileSize;
-        const y = row * baseTileSize;
-        const color = colors[(row * tileCount + col) % colors.length];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const w = baseSize + (c % 3) * 40;
+        const h = baseSize + (r % 2) * 30;
+        const x = c * baseSize;
+        const y = r * baseSize;
+        const color = colors[(r * cols + c) % colors.length];
 
         const divIcon = L.divIcon({
           className: '',
           iconSize: [w, h],
-          iconAnchor: [w / 2, h / 2],
-          html: `<div class="tile" style="width:${w}px; height:${h}px; background:${color}">${row},${col}</div>`
+          iconAnchor: [0, 0],
+          html: `<div class="tile" style="width:${w}px; height:${h}px; background:${color}">${r},${c}</div>`
         });
 
-        L.marker([y + h / 2, x + w / 2], {
+        L.marker([y, x], {
           icon: divIcon,
           interactive: false
         }).addTo(map);
