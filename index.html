@@ -29,9 +29,8 @@
 
     .image {
       object-fit: cover;
-      border: 2px solid transparent;
       position: absolute;
-      pointer-events: none; /* Le immagini non devono essere cliccabili */
+      pointer-events: none;
     }
   </style>
 </head>
@@ -42,37 +41,42 @@
   </div>
 
   <script>
-    // Funzione per caricare le immagini dalla cartella imgs
+    // Funzione per caricare tutte le immagini dalla cartella 'imgs' usando una lista definita manualmente
     function loadImages() {
       const gridElement = document.getElementById('grid');
-      const images = [];
-      const imgWidth = 300; // larghezza delle immagini fissa
-      const imgHeight = 300; // altezza delle immagini fissa
+      const imageList = [
+        'img1.jpg', 'img2.jpg', 'img3.jpg', 'img4.jpg', 'img5.jpg'
+      ]; // Sostituisci con il nome delle immagini effettive nel tuo repository
 
-      // Se vuoi aggiungere immagini dinamicamente, puoi farlo in questo modo:
-      for (let i = 0; i < 50; i++) {
+      const imgWidth = 300;  // larghezza fissa
+      const imgHeight = 300; // altezza fissa
+
+      // Aggiungi un numero di immagini casuale, e posizionale in modo adiacente
+      for (let i = 0; i < imageList.length; i++) {
         const img = document.createElement('img');
         img.classList.add('image');
+        
+        // Carica una delle immagini dalla lista
+        img.src = `imgs/${imageList[i]}`; // Immagini caricate dalla cartella imgs
+        
+        const randomWidth = Math.floor(Math.random() * (imgWidth * 1.5)) + imgWidth;  // Larghezza variabile
+        const randomHeight = Math.floor(Math.random() * (imgHeight * 1.5)) + imgHeight; // Altezza variabile
+        
+        img.style.width = `${randomWidth}px`;
+        img.style.height = `${randomHeight}px`;
 
-        // Carica una delle immagini dalla cartella 'imgs'
-        img.src = `imgs/img${(i % 5) + 1}.jpg`; // esempio con 5 immagini nella cartella imgs
-
-        img.style.width = `${imgWidth}px`;
-        img.style.height = `${imgHeight}px`;
-
-        // Posiziona le immagini in modo da essere attaccate
-        img.style.left = `${(i % 10) * imgWidth}px`;
-        img.style.top = `${Math.floor(i / 10) * imgHeight}px`;
+        // Posiziona le immagini in modo casuale
+        img.style.left = `${(i % 10) * randomWidth}px`;
+        img.style.top = `${Math.floor(i / 10) * randomHeight}px`;
 
         gridElement.appendChild(img);
       }
     }
 
     // Parametri per la griglia
-    const gridSize = 5000; // Dimensione della griglia (5000x5000 px)
-    const minZoom = 0.5; // Zoom minimo
-    const maxZoom = 3;   // Zoom massimo
-    let currentZoom = 1; // Zoom iniziale
+    const minZoom = 0.5;  // Zoom minimo
+    const maxZoom = 3;    // Zoom massimo
+    let currentZoom = 1;  // Zoom iniziale
     let isMouseDown = false;
     let startX, startY, scrollLeft, scrollTop;
 
