@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio Map</title>
+  <title>Map of Images</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     html, body {
@@ -11,14 +11,24 @@
       height: 100%;
       overflow: hidden;
     }
+
     #map {
       width: 100%;
       height: 100%;
     }
+
     .image-marker {
       pointer-events: none;
       width: 100%;
       height: 100%;
+    }
+
+    .image-square {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background-color: red; /* Default color */
+      border: 2px solid black;
     }
   </style>
 </head>
@@ -29,7 +39,7 @@
   <script>
     const map = L.map('map', {
       crs: L.CRS.Simple,
-      minZoom: -5,
+      minZoom: -2,
       maxZoom: 4,
       zoomSnap: 0.1,
       zoomDelta: 0.25,
@@ -39,52 +49,38 @@
     });
 
     // Dimensione totale della "mappa"
-    const mapSize = 5000; // Ridotto per testare se la mappa è visibile
+    const mapSize = 5000; // 5000x5000 px
     const tileSize = 300;  // Dimensione "immagine"
     map.setView([mapSize / 2, mapSize / 2], 0); // Posizione iniziale al centro della mappa
 
-    // Definisce i limiti della mappa (loop orizzontale finto)
+    // Limiti della mappa
     const bounds = [[0, 0], [mapSize, mapSize]];
     map.setMaxBounds(bounds);
 
-    const numImages = 50;
-    const imagesPerRow = 10;
-    const spacing = tileSize;
+    const numImages = 50; // Numero di "immagini" da mostrare
+    const imagesPerRow = 10; // Quante immagini per riga
 
-    // Crea una funzione per generare colori casuali
-    function getRandomColor() {
-      return Math.random() > 0.5 ? 'red' : 'green'; // alterna tra rosso e verde
-    }
-
-    // Carica "immagini" colorate e le piazza in una griglia spostata random
+    // Carica "immagini" e le piazza in una griglia
     for (let i = 0; i < numImages; i++) {
       const row = Math.floor(i / imagesPerRow);
       const col = i % imagesPerRow;
 
       // Posizione base
-      let x = col * spacing;
-      let y = row * spacing;
+      let x = col * tileSize;
+      let y = row * tileSize;
 
-      // Spostamento random nell’area infinita
+      // Posizione "random" per il test (posizionamento su mappa)
       x += Math.random() * mapSize / 2;
       y += Math.random() * mapSize / 2;
 
-      // Centra "immagine" rispetto al punto
-      const imageBounds = [
-        [y, x],
-        [y + tileSize, x + tileSize]
-      ];
-
-      // Crea un colore random (rosso o verde)
-      const color = getRandomColor();
-
-      // Crea una "immagine" colorata (un quadrato rosso o verde)
+      // Crea l'elemento CSS quadrato
       const divIcon = L.divIcon({
         className: 'image-marker',
-        html: `<div style="width: ${tileSize}px; height: ${tileSize}px; background-color: ${color};"></div>`,
+        html: `<div class="image-square" style="background-color: ${i % 2 === 0 ? 'red' : 'green'};"></div>`,
         iconSize: [tileSize, tileSize]
       });
 
+      // Posiziona la "immagine" sulla mappa
       L.marker([y + tileSize / 2, x + tileSize / 2], { icon: divIcon }).addTo(map);
     }
   </script>
