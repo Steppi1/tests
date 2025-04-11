@@ -30,7 +30,7 @@
     #panzoom {
   width: 150vmax;
   height: 150vmax;
-  column-width: 150px;
+  column-width: 300px;
   column-count: auto;
   column-gap: 0;
   position: absolute;
@@ -56,6 +56,7 @@
   pointer-events: none;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
   </style>
 </head>
@@ -99,7 +100,7 @@
       }
     }
 
-    let scale = 1;
+    let scale = 2.5;
     let originX = 0;
     let originY = 0;
     let isPanning = false;
