@@ -108,17 +108,13 @@
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
-  // Permetti pan solo con un dito
-  if (e.pointerType === 'touch' && navigator.maxTouchPoints > 1 && e.isPrimary === true) {
-    isPanning = true;
-    startX = e.clientX - originX;
-    startY = e.clientY - originY;
-    wrapper.style.cursor = 'grabbing';
-    wrapper.setPointerCapture(e.pointerId);
-    return;
-  }
+  // Pan abilitato con un solo dito su touch o sempre su mouse
+  const isTouch = e.pointerType === 'touch';
+  const touchOk = !(isTouch && navigator.maxTouchPoints > 1 && e.isPrimary === false);
 
-  if (e.pointerType === 'mouse') {
+  if (isTouch && e.isPrimary === false) return;
+
+  if (!isTouch || (isTouch && touchOk)) {
     isPanning = true;
     startX = e.clientX - originX;
     startY = e.clientY - originY;
