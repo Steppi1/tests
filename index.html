@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Masonry Map Navigation</title>
   <style>
     html, body {
@@ -28,48 +28,37 @@
       cursor: grab;
     }
     #panzoom {
-  width: 100vmin;
-  height: 100vmin;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  grid-auto-rows: auto;
-  gap: 16px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  user-select: none;
-  pointer-events: auto;
-  visibility: hidden;
-}
+      width: 1500px;
+      height: 1500px;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(10, 1fr);
+      gap: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      user-select: none;
+      pointer-events: auto;
+      visibility: hidden;
+    }
     .tile {
-  user-select: none;
-  pointer-events: none;
-  padding: 0;
-  display: block;
-  width: 100%;
-}
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
     .tile img {
-  display: block;
-  width: 100%;
-  height: auto;
-  user-select: none;
-  pointer-events: none;
-  box-sizing: border-box;
-  background: #000;
-}
-  @media (max-width: 768px) {
-  #panzoom {
-    column-width: 150px;
-    background-color: transparent;
-  }
-}
-
-@media (min-width: 769px) {
-  #panzoom {
-    column-width: 400px;
-  }
-}
-</style>
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      user-select: none;
+      pointer-events: none;
+      box-sizing: border-box;
+      background: #000;
+    }
+  </style>
 </head>
 <body>
   <div id="wrapper">
@@ -80,31 +69,29 @@
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
-    const gridSize = 20;
+    const gridCount = 10;
 
     function randomImage() {
       return images[Math.floor(Math.random() * images.length)];
     }
 
-    for (let x = -gridSize; x <= gridSize; x++) {
-      for (let y = -gridSize; y <= gridSize; y++) {
+    for (let y = 0; y < gridCount; y++) {
+      for (let x = 0; x < gridCount; x++) {
         const tile = document.createElement('div');
         tile.className = 'tile';
-        
+
         const img = document.createElement('img');
         img.src = randomImage();
 
         img.onload = () => {
-  const aspectRatio = img.naturalWidth / img.naturalHeight;
-  tile.style.width = '100%';
-  if (!panzoomEl.dataset.ready) {
-    panzoomEl.dataset.ready = 'true';
-    originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
-    originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
-    panzoomEl.style.visibility = 'visible';
-    updateTransform();
-  }
-};
+          if (!panzoomEl.dataset.ready) {
+            panzoomEl.dataset.ready = 'true';
+            originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
+            originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
+            panzoomEl.style.visibility = 'visible';
+            updateTransform();
+          }
+        };
 
         tile.appendChild(img);
         panzoomEl.appendChild(tile);
@@ -200,8 +187,6 @@
         lastTouchCenter = null;
       }
     });
-
-    
   </script>
 </body>
 </html>
