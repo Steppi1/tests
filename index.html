@@ -128,38 +128,36 @@
       wrapper.style.cursor = 'grab';
     });
 
-    // Touch zoom
-    let lastDist = null;
-    let lastCenter = null;
+    // Touch zoom FIX
+    let lastTouchDist = null;
     wrapper.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
+        const rect = wrapper.getBoundingClientRect();
         const [t1, t2] = e.touches;
         const dx = t1.clientX - t2.clientX;
         const dy = t1.clientY - t2.clientY;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        const centerX = (t1.clientX + t2.clientX) / 2;
-        const centerY = (t1.clientY + t2.clientY) / 2;
+        const midX = (t1.clientX + t2.clientX) / 2 - rect.left;
+        const midY = (t1.clientY + t2.clientY) / 2 - rect.top;
 
-        if (lastDist && lastCenter) {
-          const pinchScale = dist / lastDist;
+        if (lastTouchDist !== null) {
+          const pinchScale = dist / lastTouchDist;
           const newScale = Math.min(Math.max(0.1, scale * pinchScale), 5);
 
-          originX -= (centerX - originX) * (newScale / scale - 1);
-          originY -= (centerY - originY) * (newScale / scale - 1);
+          originX -= (midX - originX) * (newScale / scale - 1);
+          originY -= (midY - originY) * (newScale / scale - 1);
 
           scale = newScale;
           updateTransform();
         }
-        lastDist = dist;
-        lastCenter = { x: centerX, y: centerY };
+        lastTouchDist = dist;
       }
     }, { passive: false });
 
     wrapper.addEventListener('touchend', () => {
-      lastDist = null;
-      lastCenter = null;
+      lastTouchDist = null;
     });
 
     updateTransform();
