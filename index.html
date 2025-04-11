@@ -13,9 +13,10 @@
       width: 100%;
       background: #000;
       user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
       touch-action: none;
     }
-
     #wrapper {
       display: flex;
       align-items: center;
@@ -26,56 +27,37 @@
       position: relative;
       cursor: grab;
     }
-
     #panzoom {
+      width: 1500px;
+      height: 1500px;
       display: grid;
-      padding: 0;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(10, 1fr);
+      gap: 0;
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       user-select: none;
       pointer-events: auto;
       visibility: hidden;
-      box-sizing: border-box;
     }
-
     .tile {
-      padding: 5px;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+    .tile img {
+      display: block;
+      width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: none;
       box-sizing: border-box;
       background: transparent;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .tile img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-      pointer-events: none;
-      user-select: none;
-      background: transparent;
-    }
-
-    @media (max-width: 768px) {
-      #panzoom {
-        grid-template-columns: repeat(21, 200px);
-        grid-template-rows: repeat(21, 200px);
-        width: calc(200px * 21);
-        height: calc(200px * 21);
-      }
-    }
-
-    @media (min-width: 769px) {
-      #panzoom {
-        grid-template-columns: repeat(21, 400px);
-        grid-template-rows: repeat(21, 400px);
-        width: calc(400px * 21);
-        height: calc(400px * 21);
-      }
     }
   </style>
 </head>
@@ -88,29 +70,10 @@
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
-    const gridCount = 21;
+    const gridCount = 10;
 
     function randomImage() {
       return images[Math.floor(Math.random() * images.length)];
-    }
-
-    let scale = 3;
-    let originX = 0;
-    let originY = 0;
-    let isPanning = false;
-    let startX = 0;
-    let startY = 0;
-
-    function updateTransform() {
-      panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
-      panzoomEl.style.transformOrigin = "0 0";
-    }
-
-    function centerView() {
-      const rect = panzoomEl.getBoundingClientRect();
-      originX = (wrapper.clientWidth / 2) - (rect.width * scale / 2);
-      originY = (wrapper.clientHeight / 2) - (rect.height * scale / 2);
-      updateTransform();
     }
 
     for (let y = 0; y < gridCount; y++) {
@@ -124,14 +87,28 @@
         img.onload = () => {
           if (!panzoomEl.dataset.ready) {
             panzoomEl.dataset.ready = 'true';
+            originX = 0;
+            originY = 0;
             panzoomEl.style.visibility = 'visible';
-            centerView();
+            updateTransform();
           }
         };
 
         tile.appendChild(img);
         panzoomEl.appendChild(tile);
       }
+    }
+
+    let scale = 2.5;
+    let originX = 0;
+    let originY = 0;
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+
+    function updateTransform() {
+      panzoomEl.style.transform = `translate(calc(-50% + ${originX}px), calc(-50% + ${originY}px)) scale(${scale})`;
+      panzoomEl.style.transformOrigin = "0 0";
     }
 
     wrapper.addEventListener('wheel', (e) => {
@@ -143,8 +120,8 @@
       const delta = -e.deltaY * 0.001;
       const newScale = Math.min(Math.max(0.1, scale * (1 + delta)), 5);
 
-      originX -= (mouseX - originX) * (newScale / scale - 1);
-      originY -= (mouseY - originY) * (newScale / scale - 1);
+      originX -= (mouseX - wrapper.clientWidth / 2 - originX) * (newScale / scale - 1);
+      originY -= (mouseY - wrapper.clientHeight / 2 - originY) * (newScale / scale - 1);
       scale = newScale;
       updateTransform();
     }, { passive: false });
@@ -193,8 +170,8 @@
           originX += centerX - lastTouchCenter.x;
           originY += centerY - lastTouchCenter.y;
 
-          originX -= (centerX - originX) * (newScale / scale - 1);
-          originY -= (centerY - originY) * (newScale / scale - 1);
+          originX -= (centerX - wrapper.clientWidth / 2 - originX) * (newScale / scale - 1);
+          originY -= (centerY - wrapper.clientHeight / 2 - originY) * (newScale / scale - 1);
 
           scale = newScale;
           updateTransform();
@@ -210,10 +187,6 @@
         lastTouchDist = null;
         lastTouchCenter = null;
       }
-    });
-
-    window.addEventListener('resize', () => {
-      setTimeout(centerView, 100);
     });
   </script>
 </body>
