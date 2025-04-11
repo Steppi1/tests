@@ -28,12 +28,11 @@
       cursor: grab;
     }
     #panzoom {
-      width: 1500px;
-      height: 1500px;
       display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      grid-template-rows: repeat(10, 1fr);
-      gap: 0;
+      grid-auto-flow: dense;
+      justify-content: start;
+      align-content: start;
+      gap: 20px;
       position: absolute;
       top: 0;
       left: 0;
@@ -41,22 +40,36 @@
       pointer-events: auto;
       visibility: hidden;
     }
+
+    /* Mobile: 200px */
+    @media (max-width: 768px) {
+      #panzoom {
+        grid-template-columns: repeat(auto-fill, 200px);
+      }
+    }
+
+    /* Desktop: 400px */
+    @media (min-width: 769px) {
+      #panzoom {
+        grid-template-columns: repeat(auto-fill, 400px);
+      }
+    }
+
     .tile {
       width: 100%;
-      height: 100%;
-      padding: 0;
-      margin: 0;
-      overflow: hidden;
+      aspect-ratio: auto;
+      background: #111;
+      padding: 10px;
+      box-sizing: border-box;
     }
+
     .tile img {
-      display: block;
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      display: block;
+      object-fit: contain;
       user-select: none;
       pointer-events: none;
-      box-sizing: border-box;
-      background: #000;
     }
   </style>
 </head>
@@ -69,7 +82,7 @@
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
-    const gridCount = 10;
+    const totalTiles = 100;
 
     function randomImage() {
       return images[Math.floor(Math.random() * images.length)];
@@ -87,27 +100,26 @@
       panzoomEl.style.transformOrigin = "0 0";
     }
 
-    for (let y = 0; y < gridCount; y++) {
-      for (let x = 0; x < gridCount; x++) {
-        const tile = document.createElement('div');
-        tile.className = 'tile';
+    for (let i = 0; i < totalTiles; i++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
 
-        const img = document.createElement('img');
-        img.src = randomImage();
+      const img = document.createElement('img');
+      img.src = randomImage();
 
-        img.onload = () => {
-          if (!panzoomEl.dataset.ready) {
-            panzoomEl.dataset.ready = 'true';
-            originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth * scale / 2);
-            originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight * scale / 2);
-            panzoomEl.style.visibility = 'visible';
-            updateTransform();
-          }
-        };
+      img.onload = () => {
+        if (!panzoomEl.dataset.ready) {
+          panzoomEl.dataset.ready = 'true';
+          const rect = panzoomEl.getBoundingClientRect();
+          originX = (wrapper.clientWidth / 2) - (rect.width * scale / 2);
+          originY = (wrapper.clientHeight / 2) - (rect.height * scale / 2);
+          panzoomEl.style.visibility = 'visible';
+          updateTransform();
+        }
+      };
 
-        tile.appendChild(img);
-        panzoomEl.appendChild(tile);
-      }
+      tile.appendChild(img);
+      panzoomEl.appendChild(tile);
     }
 
     wrapper.addEventListener('wheel', (e) => {
