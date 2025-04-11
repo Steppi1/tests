@@ -27,6 +27,7 @@
       color: white;
       font-size: 20px;
       border: 2px solid white;
+      box-sizing: border-box;
     }
   </style>
 </head>
@@ -48,6 +49,7 @@
     const gridHeight = 5;
     const totalSize = tileSize * gridWidth;
 
+    // Centra la mappa al centro esatto della griglia
     map.setView([totalSize / 2, totalSize / 2], 0);
     map.setMaxBounds([[0, 0], [totalSize, totalSize]]);
 
@@ -66,6 +68,7 @@
           html: `<div class="tile-box" style="background:${color};">${row},${col}</div>`
         });
 
+        // Leaflet coord: [y, x] --> [lat, lng]
         L.marker([y + tileSize / 2, x + tileSize / 2], { icon }).addTo(map);
       }
     }
