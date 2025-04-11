@@ -22,9 +22,12 @@
 
     #grid {
       position: absolute;
-      will-change: transform;
       top: 0;
       left: 0;
+      will-change: transform;
+      display: flex;
+      flex-wrap: nowrap;
+      flex-direction: row;
     }
 
     .image {
@@ -38,6 +41,7 @@
       display: flex;
       flex-wrap: nowrap;
     }
+
   </style>
 </head>
 <body>
@@ -53,8 +57,17 @@
       "imgs/Unknown.jpeg",
       "imgs/images-1.jpeg",
       "imgs/images.jpeg",
+      "imgs/image5.jpg",
+      "imgs/Unknown-1.jpeg",
+      "imgs/Unknown.jpeg",
+      "imgs/images-1.jpeg",
+      "imgs/images.jpeg",
+      "imgs/image5.jpg",
+      "imgs/Unknown-1.jpeg",
+      "imgs/Unknown.jpeg",
+      "imgs/images-1.jpeg",
+      "imgs/images.jpeg",
       "imgs/image5.jpg"
-      // Aggiungi altre immagini qui
     ];
 
     const gridElement = document.getElementById("grid");
@@ -62,16 +75,16 @@
     // Posizione e zoom iniziali
     let position = { x: 0, y: 0 };
     let zoomLevel = 1;
-    
-    // Funzione per creare le immagini
+
+    // Funzione per creare le immagini e posizionarle in modo casuale
     function loadImages() {
       images.forEach((imageSrc, index) => {
         const img = document.createElement("img");
         img.src = imageSrc;
         img.className = "image";
         
-        // Imposta le immagini in una posizione casuale per esempio
-        const xPos = (index % 5) * 500;  // Regola la distanza tra le immagini
+        // Calcola la posizione casuale per creare un effetto "puzzle"
+        const xPos = (index % 5) * 500;
         const yPos = Math.floor(index / 5) * 500;
 
         img.style.left = `${xPos}px`;
@@ -79,26 +92,33 @@
 
         gridElement.appendChild(img);
       });
+
+      // Dopo aver caricato tutte le immagini, centra la mappa
+      centerMap();
     }
 
-    // Funzione di zoom
+    // Funzione di zoom, centrato sul cursore
     function zoom(event) {
       event.preventDefault();
       const scale = event.deltaY < 0 ? 1.1 : 0.9;  // Se la rotella va su zoom in, altrimenti zoom out
       zoomLevel *= scale;
       zoomLevel = Math.min(Math.max(zoomLevel, 0.5), 5);  // Limita lo zoom tra 0.5x e 5x
-      updateZoom();
+      updateZoom(event.clientX, event.clientY);
     }
 
     // Funzione per aggiornare lo zoom
-    function updateZoom() {
+    function updateZoom(mouseX, mouseY) {
+      const offsetX = (mouseX - window.innerWidth / 2) / zoomLevel;
+      const offsetY = (mouseY - window.innerHeight / 2) / zoomLevel;
+
+      gridElement.style.transformOrigin = `${offsetX}px ${offsetY}px`;
       gridElement.style.transform = `scale(${zoomLevel})`;
     }
 
     // Funzione di navigazione (muovi la mappa)
     let isDragging = false;
     let startX, startY;
-    
+
     function startDrag(e) {
       isDragging = true;
       startX = e.clientX - position.x;
@@ -119,14 +139,29 @@
       document.body.style.cursor = 'grab';
     }
 
+    // Funzione per centrare la mappa al caricamento
+    function centerMap() {
+      const centerX = (window.innerWidth - gridElement.offsetWidth) / 2;
+      const centerY = (window.innerHeight - gridElement.offsetHeight) / 2;
+      position = { x: centerX, y: centerY };
+      gridElement.style.transform = `translate(${centerX}px, ${centerY}px) scale(${zoomLevel})`;
+    }
+
+    // Funzione per far ripetere la mappa quando si esce dai limiti
+    function repeatMap() {
+      gridElement.style.transform = `translate(${position.x % gridElement.offsetWidth}px, ${position.y % gridElement.offsetHeight}px) scale(${zoomLevel})`;
+    }
+
     // Aggiungi gli event listener per lo zoom e la navigazione
     document.getElementById("viewport").addEventListener("wheel", zoom);
     gridElement.addEventListener("mousedown", startDrag);
     document.addEventListener("mousemove", drag);
     document.addEventListener("mouseup", stopDrag);
+    window.addEventListener("resize", centerMap);
 
     // Carica le immagini iniziali
     loadImages();
   </script>
+
 </body>
 </html>
