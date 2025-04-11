@@ -30,6 +30,7 @@
     #panzoom {
   width: 150vmax;
   height: 150vmax;
+  column-width: 300px;
   column-gap: 0;
   position: absolute;
   top: 0;
@@ -52,13 +53,14 @@
   height: auto;
   user-select: none;
   pointer-events: none;
-  margin: 2px;
+  margin: 8px;
   padding: 0;
   box-sizing: border-box;
 }
   @media (max-width: 768px) {
   #panzoom {
     column-width: 150px;
+    background-color: transparent;
   }
 }
 
