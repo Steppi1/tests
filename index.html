@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Zoom Grid</title>
+  <title>Infinite Zoom Grid</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     html, body {
@@ -45,34 +45,62 @@
     const cols = 10;
     const colors = ['red', 'green', 'blue', 'purple', 'orange'];
 
-    // Genera griglia
+    const tiles = [];
+    let yOffset = 0;
+
+    // Prepara le dimensioni per ogni colonna, per allineare correttamente i tile
+    const columnWidths = Array(cols).fill(0);
+    const rowHeights = Array(rows).fill(0);
+    const tileData = [];
+
     for (let y = 0; y < rows; y++) {
+      let xOffset = 0;
       for (let x = 0; x < cols; x++) {
-        const w = tileSize + (Math.floor(Math.random() * 3) * 50);
-        const h = tileSize + (Math.floor(Math.random() * 3) * 50);
+        const w = tileSize + (Math.floor(Math.random() * 3) * 40);
+        const h = tileSize + (Math.floor(Math.random() * 3) * 40);
         const color = colors[(x + y) % colors.length];
 
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        tile.style.width = w + 'px';
-        tile.style.height = h + 'px';
-        tile.style.left = x * tileSize + 'px';
-        tile.style.top = y * tileSize + 'px';
-        tile.style.background = color;
-        tile.innerText = `${w}x${h}`;
-        tile.style.color = 'white';
-        tile.style.display = 'flex';
-        tile.style.alignItems = 'center';
-        tile.style.justifyContent = 'center';
-        tile.style.fontFamily = 'sans-serif';
+        // Aggiorna larghezza colonna e altezza riga
+        columnWidths[x] = Math.max(columnWidths[x], w);
+        rowHeights[y] = Math.max(rowHeights[y], h);
 
-        grid.appendChild(tile);
+        tileData.push({ x, y, w, h, color });
       }
     }
 
-    // Zoom + Drag
-    let scale = 2;
-    let origin = { x: 0, y: 0 };
+    // Calcola le posizioni reali ora che abbiamo le misure finali
+    const colPositions = columnWidths.reduce((acc, w, i) => {
+      acc.push((acc[i - 1] || 0) + (i > 0 ? columnWidths[i - 1] : 0));
+      return acc;
+    }, []);
+
+    const rowPositions = rowHeights.reduce((acc, h, i) => {
+      acc.push((acc[i - 1] || 0) + (i > 0 ? rowHeights[i - 1] : 0));
+      return acc;
+    }, []);
+
+    // Genera i tile reali
+    tileData.forEach(({ x, y, w, h, color }) => {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.style.width = w + 'px';
+      tile.style.height = h + 'px';
+      tile.style.left = colPositions[x] + 'px';
+      tile.style.top = rowPositions[y] + 'px';
+      tile.style.background = color;
+      tile.innerText = `${w}x${h}`;
+      tile.style.color = 'white';
+      tile.style.display = 'flex';
+      tile.style.alignItems = 'center';
+      tile.style.justifyContent = 'center';
+      tile.style.fontFamily = 'sans-serif';
+      grid.appendChild(tile);
+      tiles.push(tile);
+    });
+
+    // Zoom e movimento
+    let scale = 2; // Zoom iniziale maggiore
+    let origin = { x: -300, y: -200 }; // posizione iniziale centrata
     let isDragging = false;
     let dragStart = { x: 0, y: 0 };
     let scrollStart = { x: 0, y: 0 };
@@ -85,8 +113,22 @@
 
     document.getElementById('viewport').addEventListener('wheel', e => {
       e.preventDefault();
-      const delta = -e.deltaY * 0.001;
-      scale = Math.max(0.5, Math.min(4, scale + delta));
+      const zoomIntensity = 0.1;
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      const gridRect = grid.getBoundingClientRect();
+      const offsetX = (mouseX - gridRect.left) / scale;
+      const offsetY = (mouseY - gridRect.top) / scale;
+
+      const delta = -e.deltaY * zoomIntensity;
+      const newScale = Math.max(0.2, Math.min(5, scale + delta));
+
+      // calcola la nuova origine per mantenere il punto sotto al cursore fisso
+      origin.x -= offsetX * (newScale - scale);
+      origin.y -= offsetY * (newScale - scale);
+
+      scale = newScale;
       updateTransform();
     });
 
@@ -103,6 +145,35 @@
       origin.y = scrollStart.y + (e.clientY - dragStart.y);
       updateTransform();
     });
+
+    // 🔁 Griglia infinita (moltiplica le tiles virtualmente)
+    function replicateGrid(times = 3) {
+      const baseWidth = colPositions[cols - 1] + columnWidths[cols - 1];
+      const baseHeight = rowPositions[rows - 1] + rowHeights[rows - 1];
+
+      for (let i = -times; i <= times; i++) {
+        for (let j = -times; j <= times; j++) {
+          if (i === 0 && j === 0) continue; // skip the original
+          tileData.forEach(({ x, y, w, h, color }) => {
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+            tile.style.width = w + 'px';
+            tile.style.height = h + 'px';
+            tile.style.left = (colPositions[x] + i * baseWidth) + 'px';
+            tile.style.top = (rowPositions[y] + j * baseHeight) + 'px';
+            tile.style.background = color;
+            tile.style.display = 'flex';
+            tile.style.alignItems = 'center';
+            tile.style.justifyContent = 'center';
+            tile.style.color = 'white';
+            tile.style.fontFamily = 'sans-serif';
+            grid.appendChild(tile);
+          });
+        }
+      }
+    }
+
+    replicateGrid(2); // crea duplicati attorno alla griglia principale
   </script>
 </body>
 </html>
