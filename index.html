@@ -13,7 +13,7 @@
       height: 100vh;
       overflow: hidden; /* Evita barre di scroll */
     }
-    
+
     /* Contenitore principale: sfondo scuro, dimensioni piene */
     #container {
       width: 100%;
@@ -22,24 +22,20 @@
       background-color: #222; 
       overflow: hidden;
     }
-    /* Il mosaico avrà dimensioni fisse in px, 
-       qui 8 colonne e 4 righe (32 immagini totali se ripetute 4 volte) */
+
+    /* Il mosaico avrà dimensioni fisse in px
+       (8 colonne × 150px = 1200px, 4 righe × 150px = 600px) */
     #mosaic {
-      width: 1200px; /* 8 colonne × 150px */
-      height: 600px; /* 4 righe × 150px (vedi sotto) */
+      width: 1200px;
+      height: 600px;
       display: grid;
-      /* 8 colonne, ogni cella è 150px di larghezza */
       grid-template-columns: repeat(8, 150px);
-      /* le righe verranno create automaticamente grazie a grid-auto-rows 
-         oppure con un layout "ripetuto" in JS. Per sicurezza, forziamo: */
       grid-auto-rows: 150px;
-      gap: 0;           /* zero spazio tra celle, effetto puzzle */
-      position: relative; /* Necessario per calcolare i bounding rect */
-      /* Niente centering via CSS: il centraggio e lo zoom 
-         saranno fatti via panzoom(). */
+      gap: 0;               /* zero spazio tra le celle */
+      position: relative;   /* per calcolare i bounding rect con panzoom */
     }
-    /* Ogni immagine occupa esattamente la cella 150x150,
-       ridimensionandosi con object-fit: cover senza creare spazi */
+
+    /* Ogni immagine 150×150, adattata senza distorsioni */
     #mosaic img {
       width: 150px;
       height: 150px;
@@ -51,20 +47,18 @@
 <body>
   <div id="container">
     <div id="mosaic">
-      <!-- Le immagini saranno inserite dinamicamente da JS, 
-           ma potresti anche inserirle tutte staticamente se preferisci. -->
+      <!-- Le immagini verranno inserite via JS -->
     </div>
   </div>
 
-  <!-- Libreria panzoom di anvaka (Ucraina) da JSDelivr -->
-  <!-- Nota: versioni differenti potrebbero cambiare l’API, qui usiamo la 3.2.3 -->
+  <!-- Libreria panzoom di anvaka da JSDelivr (versione 3.2.3) -->
   <script src="https://cdn.jsdelivr.net/gh/anvaka/panzoom@3.2.3/dist/panzoom.min.js"></script>
   
   <script>
   /**************************************************************
    * 1) CREAZIONE DEL MOSAICO:
-   *    Ripetiamo le immagini "img 1.png" ... "img 8.png"
-   *    per un certo numero di righe (qui 4).
+   *    Ripetiamo le immagini “img 1.png” ... “img 8.png” 
+   *    per un certo numero di righe (in questo caso, 4).
    **************************************************************/
   const baseImages = [
     "imgs/img 1.png",
@@ -76,10 +70,9 @@
     "imgs/img 7.png",
     "imgs/img 8.png"
   ];
-  // Numero di righe: 4
-  const repeats = 4;
+  const repeats = 4;  // numero di righe
   const mosaic = document.getElementById("mosaic");
-  
+
   for (let r = 0; r < repeats; r++) {
     for (let i = 0; i < baseImages.length; i++) {
       const img = document.createElement("img");
@@ -90,75 +83,51 @@
   }
 
   /**************************************************************
-   * 2) CONFIGURAZIONE DI PANZOOM (anvaka)
-   *    - Bounds attivo (bounds: true)
-   *    - Bounds padding (boundsPadding: 0.2) per un po' di margine
-   *    - Zoom iniziale (1.5) e centraggio manuale
+   * 2) CONFIGURAZIONE DI PANZOOM
+   *    bounds + boundsPadding per “muri invisibili”,
+   *    minZoom e maxZoom impostati, ecc.
    **************************************************************/
-  // Selezioniamo l'elemento su cui applicare panzoom
-  const panzoomElement = mosaic;
-  
-  // Inizializziamo la libreria Panzoom
-  const pz = panzoom(panzoomElement, {
+  const pz = panzoom(mosaic, {
     maxZoom: 4,
     minZoom: 1,
-    // Abilita i 'muri invisibili' all'interno del contenitore
-    // in modo che non si possa trascinare il mosaico fuori eccessivamente.
     bounds: true,
-    // Aggiunge margini: 0 = il mosaico resta sempre perfettamente dentro,
-    // 0.2 significa che puoi spostarlo un po' fuori, ma non infinite distanze.
-    boundsPadding: 0.2, 
-    // Aggiungi se vuoi invertire lo scroll per zoom:
-    // zoomSpeed: 0.065
-  });
-  
-  // Per lo scroll del mouse, blocchiamo l'eventuale scroll del browser
-  // e abilitiamo lo zoom di panzoom
-  const container = document.getElementById("container");
-  container.addEventListener("wheel", function (e) {
-    // Previene lo scroll nella finestra
-    e.preventDefault();
-  }, { passive: false });
-  
-  // Colleghiamo la rotella del mouse allo zoom di panzoom:
-  container.addEventListener("wheel", function (e) {
-    // Zoom centrato dove c'è il puntatore
-    pz.zoomWithWheel(e);
+    boundsPadding: 0.2
   });
 
   /**************************************************************
-   * 3) CENTRAGGIO E ZOOM INIZIALE (1.5)
-   *    - Calcoliamo la dimensione del container e del mosaic
-   *    - Usiamo moveTo(...) e zoomAbs(...) per centrare
+   * 3) GESTIONE SCROLL DEL MOUSE:
+   *    - Previene lo scroll della pagina
+   *    - Esegue zoom con la rotella del mouse
    **************************************************************/
-  // Aspetta il caricamento delle immagini per ottenere
-  // la dimensione reale del mosaico (in teoria sappiamo che è 1200×600)
-  // ma facciamo un passaggio in più per sicurezza.
+  const container = document.getElementById("container");
+  container.addEventListener("wheel", function (e) {
+    e.preventDefault();       // niente scroll della finestra
+    pz.zoomWithWheel(e);      // zoom panzoom
+  }, { passive: false });
+
+  /**************************************************************
+   * 4) CENTRAGGIO E ZOOM INIZIALE (es. 1.5)
+   *    - Aspettiamo il load delle immagini
+   *    - Calcoliamo i rettangoli di container e mosaic
+   *    - Calcoliamo il centro e applichiamo lo spostamento
+   **************************************************************/
   window.addEventListener("load", () => {
     const containerRect = container.getBoundingClientRect();
     const mosaicRect = mosaic.getBoundingClientRect();
     
-    // Centro del mosaic in coordinate "locali"
+    // Centro del mosaic
     const mosaicCenterX = mosaicRect.width / 2;
     const mosaicCenterY = mosaicRect.height / 2;
     
-    // Centro del container (viewport)
+    // Centro del container
     const containerCenterX = containerRect.width / 2;
     const containerCenterY = containerRect.height / 2;
     
     // Zoom iniziale
     const initialZoom = 1.5;
-    
-    // 1) Imposta lo zoom con zoomAbs (x, y, scale)
-    //    - x, y: coordinate su cui ruota/centra lo zoom
-    //    - usiamo il "centro" del mosaico
     pz.zoomAbs(mosaicCenterX, mosaicCenterY, initialZoom);
     
-    // 2) Sposta il mosaico in modo che il suo centro coincida
-    //    con il centro del container
-    //    moveTo(x, y):
-    //      x = containerCenterX - (mosaicCenterX * initialZoom)
-    //      y = containerCenterY - (mosaicCenterY * initialZoom)
+    // Spostamento in modo da centrare mosaic nel container
     const finalX = containerCenterX - mosaicCenterX * initialZoom;
     const finalY = containerCenterY - mosaicCenterY * initialZoom;
     pz.moveTo(finalX, finalY);
