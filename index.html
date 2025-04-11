@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scrollable Color Map</title>
+  <title>Portfolio Grid</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     html, body {
@@ -17,15 +17,15 @@
       height: 100vh;
     }
 
-    .tile-box {
+    .tile {
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 24px;
       font-weight: bold;
       color: white;
-      font-size: 20px;
       border: 2px solid white;
       box-sizing: border-box;
     }
@@ -36,40 +36,42 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+    // CREA MAPPA
     const map = L.map('map', {
       crs: L.CRS.Simple,
-      minZoom: -3,
+      minZoom: -2,
       maxZoom: 4,
-      worldCopyJump: true,
-      zoomControl: true
+      zoomSnap: 0.1,
+      zoomDelta: 0.25,
+      zoomControl: true,
+      attributionControl: false
     });
 
-    const tileSize = 200;
-    const gridWidth = 5;
-    const gridHeight = 5;
-    const totalSize = tileSize * gridWidth;
+    const tileSize = 300;         // Dimensione quadrato
+    const gridSize = 10;          // 10x10
+    const mapSize = gridSize * tileSize;
 
-    // Centra la mappa al centro esatto della griglia
-    map.setView([totalSize / 2, totalSize / 2], 0);
-    map.setMaxBounds([[0, 0], [totalSize, totalSize]]);
+    // Centra la mappa
+    map.setView([mapSize / 2, mapSize / 2], 0);
+    map.setMaxBounds([[0, 0], [mapSize, mapSize]]);
 
-    const colors = ['red', 'green', 'blue', 'purple', 'orange', 'teal', 'brown', 'gray', 'pink'];
+    // Colori per i riquadri
+    const colors = ['red', 'green', 'blue', 'purple', 'orange', 'teal', 'brown', 'black', 'gray', 'pink'];
 
-    for (let row = 0; row < gridHeight; row++) {
-      for (let col = 0; col < gridWidth; col++) {
-        const y = row * tileSize;
+    for (let row = 0; row < gridSize; row++) {
+      for (let col = 0; col < gridSize; col++) {
         const x = col * tileSize;
+        const y = row * tileSize;
+        const color = colors[(row * gridSize + col) % colors.length];
 
-        const color = colors[(row * gridWidth + col) % colors.length];
-
-        const icon = L.divIcon({
+        const divIcon = L.divIcon({
           className: '',
           iconSize: [tileSize, tileSize],
-          html: `<div class="tile-box" style="background:${color};">${row},${col}</div>`
+          html: `<div class="tile" style="background:${color}">${row},${col}</div>`
         });
 
-        // Leaflet coord: [y, x] --> [lat, lng]
-        L.marker([y + tileSize / 2, x + tileSize / 2], { icon }).addTo(map);
+        // In Leaflet: [lat, lng] == [y, x]
+        L.marker([y + tileSize / 2, x + tileSize / 2], { icon: divIcon }).addTo(map);
       }
     }
   </script>
