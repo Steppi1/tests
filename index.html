@@ -28,10 +28,10 @@
       cursor: grab;
     }
     #panzoom {
-  width: 150vmax;
-  height: 150vmax;
-  column-width: 300px;
-  column-gap: 0;
+  width: 100vmin;
+  height: 100vmin;
+  column-width: 150px;
+  column-gap: 16px;
   position: absolute;
   top: 0;
   left: 0;
@@ -49,13 +49,14 @@
 }
     .tile img {
   display: block;
-  width: 100%;
+  width: calc(100% - 16px);
   height: auto;
   user-select: none;
   pointer-events: none;
   margin: 8px;
   padding: 0;
   box-sizing: border-box;
+  background: #000;
 }
   @media (max-width: 768px) {
   #panzoom {
