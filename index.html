@@ -128,51 +128,37 @@
       wrapper.style.cursor = 'grab';
     });
 
-    // Touch zoom + pan simultaneo corretto
-    let lastTouch = [];
+    // Touch zoom FIX: usa la distanza media e il movimento del centro
+    let lastZoomCenter = null;
+    let lastDistance = null;
     wrapper.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
+
         const rect = wrapper.getBoundingClientRect();
         const [t1, t2] = e.touches;
-        const dx = t1.clientX - t2.clientX;
-        const dy = t1.clientY - t2.clientY;
-        const dist = Math.hypot(dx, dy);
+        const currentDistance = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+        const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
+        const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
 
-        const midX = (t1.clientX + t2.clientX) / 2 - rect.left;
-        const midY = (t1.clientY + t2.clientY) / 2 - rect.top;
-
-        if (lastTouch.length === 2) {
-          const lastDx = lastTouch[0].x - lastTouch[1].x;
-          const lastDy = lastTouch[0].y - lastTouch[1].y;
-          const lastDist = Math.hypot(lastDx, lastDy);
-
-          const pinchScale = dist / lastDist;
-          const newScale = Math.min(Math.max(0.1, scale * pinchScale), 5);
-
-          originX -= (midX - originX) * (newScale / scale - 1);
-          originY -= (midY - originY) * (newScale / scale - 1);
+        if (lastZoomCenter && lastDistance) {
+          const newScale = Math.min(Math.max(0.1, scale * (currentDistance / lastDistance)), 5);
+          originX += (centerX - lastZoomCenter.x);
+          originY += (centerY - lastZoomCenter.y);
+          originX -= (centerX - originX) * (newScale / scale - 1);
+          originY -= (centerY - originY) * (newScale / scale - 1);
           scale = newScale;
-
-          const prevMidX = (lastTouch[0].x + lastTouch[1].x) / 2 - rect.left;
-          const prevMidY = (lastTouch[0].y + lastTouch[1].y) / 2 - rect.top;
-
-          const deltaX = midX - prevMidX;
-          const deltaY = midY - prevMidY;
-          originX += deltaX;
-          originY += deltaY;
+          updateTransform();
         }
 
-        lastTouch = [
-          { x: t1.clientX, y: t1.clientY },
-          { x: t2.clientX, y: t2.clientY }
-        ];
-        updateTransform();
+        lastZoomCenter = { x: centerX, y: centerY };
+        lastDistance = currentDistance;
       }
     }, { passive: false });
 
     wrapper.addEventListener('touchend', () => {
-      lastTouch = [];
+      lastZoomCenter = null;
+      lastDistance = null;
     });
 
     updateTransform();
