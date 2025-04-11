@@ -79,7 +79,6 @@
         img.onload = () => {
   const aspectRatio = img.naturalWidth / img.naturalHeight;
   tile.style.width = `${256 * aspectRatio}px`;
-  tile.style.height = `${256 / aspectRatio}px`;
   if (!panzoomEl.dataset.ready) {
     panzoomEl.dataset.ready = 'true';
     originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
