@@ -110,9 +110,15 @@
 let lastTouchDist = null;
 let lastTouchCenter = null;
 
+let lastTouchDist = null;
+let lastTouchCenter = null;
+
 wrapper.addEventListener('touchmove', (e) => {
   if (e.touches.length === 2) {
     e.preventDefault();
+
+    // Disabilita pan durante pinch
+    isPanning = false;
 
     const rect = wrapper.getBoundingClientRect();
     const [t1, t2] = e.touches;
