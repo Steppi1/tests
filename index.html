@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Masonry Layout Map</title>
+  <title>Masonry Map Navigation</title>
   <style>
     html, body {
       margin: 0;
@@ -13,6 +13,8 @@
       width: 100%;
       background: #000;
       user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
       touch-action: none;
     }
     #wrapper {
@@ -26,11 +28,11 @@
       position: absolute;
       top: 0;
       left: 0;
-      user-select: none;
-      pointer-events: auto;
       display: flex;
       gap: 10px;
       align-items: flex-start;
+      user-select: none;
+      pointer-events: auto;
     }
     .column {
       display: flex;
@@ -45,8 +47,8 @@
     .tile img {
       width: 100%;
       height: auto;
-      display: block;
       object-fit: cover;
+      display: block;
       user-select: none;
       pointer-events: none;
     }
@@ -63,7 +65,7 @@
 
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
     const totalImages = 400;
-    const numColumns = Math.floor(Math.sqrt(totalImages)); // per blocco quadrato
+    const numColumns = Math.floor(Math.sqrt(totalImages));
 
     // Crea colonne
     const columns = Array.from({ length: numColumns }, () => {
@@ -85,14 +87,13 @@
       tile.className = 'tile';
       tile.appendChild(imgEl);
 
-      // distribuisci in modo round-robin
       columns[i % numColumns].appendChild(tile);
     }
 
-    // Pan & zoom (immutato)
+    // Zoom + Pan
     let scale = 1;
-    let originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
-    let originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
+    let originX = 0;
+    let originY = 0;
     let isPanning = false;
     let startX = 0;
     let startY = 0;
@@ -101,6 +102,13 @@
       panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
       panzoomEl.style.transformOrigin = "0 0";
     }
+
+    // Centra il contenuto all'avvio
+    window.addEventListener('load', () => {
+      originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
+      originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
+      updateTransform();
+    });
 
     wrapper.addEventListener('wheel', (e) => {
       e.preventDefault();
@@ -118,7 +126,7 @@
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'touch' && !e.isPrimary) return;
+      if (e.pointerType === 'touch' && e.isPrimary === false) return;
       isPanning = true;
       startX = e.clientX - originX;
       startY = e.clientY - originY;
@@ -138,6 +146,7 @@
       wrapper.style.cursor = 'grab';
     });
 
+    // Pinch-to-zoom mobile
     let lastTouchDist = null;
     let lastTouchCenter = null;
 
@@ -154,7 +163,7 @@
         const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
         const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
 
-        if (lastTouchDist && lastTouchCenter) {
+        if (lastTouchDist !== null && lastTouchCenter) {
           const scaleFactor = dist / lastTouchDist;
           const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
 
