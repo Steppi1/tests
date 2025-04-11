@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Masonry Map Navigation</title>
   <style>
     html, body {
@@ -13,68 +13,39 @@
       width: 100%;
       background: #000;
       user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
       touch-action: none;
     }
-
     #wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
       width: 100%;
       height: 100%;
       overflow: hidden;
       position: relative;
       cursor: grab;
     }
-
     #panzoom {
-      display: grid;
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 0;
+      left: 0;
+      display: grid;
+      grid-auto-flow: dense;
       user-select: none;
       pointer-events: auto;
-      visibility: hidden;
-      box-sizing: content-box;
-      gap: 0;
     }
-
     .tile {
-      width: 100%;
-      height: 100%;
-      padding: 0;
-      margin: 0;
-      overflow: hidden;
-    }
-
-    .tile img {
-      display: block;
-      width: 100%;
-      max-height: 100%;
-      object-fit: contain;
+      width: 256px;
+      height: 256px;
       user-select: none;
       pointer-events: none;
-      box-sizing: border-box;
-      background: transparent;
     }
-
-    @media (max-width: 768px) {
-      #panzoom {
-        grid-template-columns: repeat(10, 200px);
-        grid-template-rows: repeat(10, 200px);
-        width: calc(200px * 10);
-        height: calc(200px * 10);
-      }
-    }
-
-    @media (min-width: 769px) {
-      #panzoom {
-        grid-template-columns: repeat(10, 400px);
-        grid-template-rows: repeat(10, 400px);
-        width: calc(400px * 10);
-        height: calc(400px * 10);
-      }
+    .tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      user-select: none;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -86,45 +57,37 @@
   <script>
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
+
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
-    const gridCount = 10;
+    const gridSize = 20;
 
     function randomImage() {
       return images[Math.floor(Math.random() * images.length)];
     }
 
-    for (let y = 0; y < gridCount; y++) {
-      for (let x = 0; x < gridCount; x++) {
+    for (let x = -gridSize; x <= gridSize; x++) {
+      for (let y = -gridSize; y <= gridSize; y++) {
         const tile = document.createElement('div');
         tile.className = 'tile';
+        tile.style.gridColumn = x + gridSize + 1;
+        tile.style.gridRow = y + gridSize + 1;
 
         const img = document.createElement('img');
         img.src = randomImage();
-
-        img.onload = () => {
-          if (!panzoomEl.dataset.ready) {
-            panzoomEl.dataset.ready = 'true';
-            originX = 0;
-            originY = 0;
-            panzoomEl.style.visibility = 'visible';
-            updateTransform();
-          }
-        };
-
         tile.appendChild(img);
         panzoomEl.appendChild(tile);
       }
     }
 
-    let scale = 2.5;
-    let originX = 0;
-    let originY = 0;
+    let scale = 1;
+    let originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
+    let originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
     let isPanning = false;
     let startX = 0;
     let startY = 0;
 
     function updateTransform() {
-      panzoomEl.style.transform = `translate(calc(-50% + ${originX}px), calc(-50% + ${originY}px)) scale(${scale})`;
+      panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
       panzoomEl.style.transformOrigin = "0 0";
     }
 
@@ -137,19 +100,21 @@
       const delta = -e.deltaY * 0.001;
       const newScale = Math.min(Math.max(0.1, scale * (1 + delta)), 5);
 
-      originX -= (mouseX - wrapper.clientWidth / 2 - originX) * (newScale / scale - 1);
-      originY -= (mouseY - wrapper.clientHeight / 2 - originY) * (newScale / scale - 1);
+      originX -= (mouseX - originX) * (newScale / scale - 1);
+      originY -= (mouseY - originY) * (newScale / scale - 1);
       scale = newScale;
       updateTransform();
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'touch' && e.isPrimary === false) return;
-      isPanning = true;
-      startX = e.clientX - originX;
-      startY = e.clientY - originY;
-      wrapper.style.cursor = 'grabbing';
-      wrapper.setPointerCapture(e.pointerId);
+  // Attiva pan su un solo dito (mobile) o sempre su mouse
+  if (e.pointerType === 'touch' && e.isPrimary === false) return;
+
+  isPanning = true;
+  startX = e.clientX - originX;
+  startY = e.clientY - originY;
+  wrapper.style.cursor = 'grabbing';
+  wrapper.setPointerCapture(e.pointerId);
     });
 
     wrapper.addEventListener('pointermove', (e) => {
@@ -164,47 +129,50 @@
       wrapper.style.cursor = 'grab';
     });
 
-    let lastTouchDist = null;
-    let lastTouchCenter = null;
+    // Touch pinch-to-zoom corretto
+let lastTouchDist = null;
+let lastTouchCenter = null;
 
-    wrapper.addEventListener('touchmove', (e) => {
-      if (e.touches.length === 2) {
-        e.preventDefault();
-        isPanning = false;
-        const rect = wrapper.getBoundingClientRect();
-        const [t1, t2] = e.touches;
+wrapper.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    isPanning = false;
+    const rect = wrapper.getBoundingClientRect();
+    const [t1, t2] = e.touches;
 
-        const dx = t1.clientX - t2.clientX;
-        const dy = t1.clientY - t2.clientY;
-        const dist = Math.hypot(dx, dy);
-        const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
-        const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
+    const dx = t1.clientX - t2.clientX;
+    const dy = t1.clientY - t2.clientY;
+    const dist = Math.hypot(dx, dy);
+    const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
+    const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
 
-        if (lastTouchDist !== null && lastTouchCenter) {
-          const scaleFactor = dist / lastTouchDist;
-          const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
+    if (lastTouchDist !== null && lastTouchCenter) {
+      const scaleFactor = dist / lastTouchDist;
+      const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
 
-          originX += centerX - lastTouchCenter.x;
-          originY += centerY - lastTouchCenter.y;
+      originX += centerX - lastTouchCenter.x;
+      originY += centerY - lastTouchCenter.y;
 
-          originX -= (centerX - wrapper.clientWidth / 2 - originX) * (newScale / scale - 1);
-          originY -= (centerY - wrapper.clientHeight / 2 - originY) * (newScale / scale - 1);
+      originX -= (centerX - originX) * (newScale / scale - 1);
+      originY -= (centerY - originY) * (newScale / scale - 1);
 
-          scale = newScale;
-          updateTransform();
-        }
+      scale = newScale;
+      updateTransform();
+    }
 
-        lastTouchDist = dist;
-        lastTouchCenter = { x: centerX, y: centerY };
-      }
-    }, { passive: false });
+    lastTouchDist = dist;
+    lastTouchCenter = { x: centerX, y: centerY };
+  }
+}, { passive: false });
 
-    wrapper.addEventListener('touchend', (e) => {
-      if (e.touches.length < 2) {
-        lastTouchDist = null;
-        lastTouchCenter = null;
-      }
-    });
+wrapper.addEventListener('touchend', (e) => {
+  if (e.touches.length < 2) {
+    lastTouchDist = null;
+    lastTouchCenter = null;
+  }
+});
+
+    updateTransform();
   </script>
 </body>
 </html>
