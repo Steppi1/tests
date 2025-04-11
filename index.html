@@ -4,86 +4,88 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mappa Interattiva a Mosaico</title>
+  <!-- Inclusione dello stile Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    /* Resetta margini e padding e imposta viewport a piena larghezza/altezza */
+    /* Rimuove margini/padding e assicura la copertura totale della viewport */
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
-      width: 100%;
       height: 100%;
     }
-    /* Contenitore che copre l'intera viewport */
-    #container {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      background: #f0f0f0;
-    }
-    /* Il contenitore del mosaico:
-       - Posizionato assolutamente e centrato mediante left/top 50% + translate(-50%, -50%)
-       - Usando CSS grid per disporre le immagini in colonne fisse (qui 5 colonne da 150px ciascuna)
-       - Senza gap per ottenere l'effetto "puzzle" */
-    #mosaic {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      display: grid;
-      grid-template-columns: repeat(5, 150px); /* Modifica il numero delle colonne se necessario */
-      gap: 0;
-      cursor: grab;
-    }
-    /* Stile per le immagini, che vengono ridimensionate per adattarsi a 150x150px;
-       object-fit: cover mantiene proporzioni adeguate tagliando eventuali eccedenze */
-    #mosaic img {
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-      display: block;
+    /* Contenitore della mappa che occupa l'intera finestra */
+    #map {
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
 <body>
-  <div id="container">
-    <div id="mosaic">
-      <!-- Sostituisci o aggiungi le immagini presenti nella cartella "imgs" -->
-      <img src="imgs/img1.jpg" alt="Immagine 1">
-      <img src="imgs/img2.jpg" alt="Immagine 2">
-      <img src="imgs/img3.jpg" alt="Immagine 3">
-      <img src="imgs/img4.jpg" alt="Immagine 4">
-      <img src="imgs/img5.jpg" alt="Immagine 5">
-      <img src="imgs/img6.jpg" alt="Immagine 6">
-      <img src="imgs/img7.jpg" alt="Immagine 7">
-      <img src="imgs/img8.jpg" alt="Immagine 8">
-      <img src="imgs/img9.jpg" alt="Immagine 9">
-      <!-- Puoi aggiungere altre immagini secondo le tue necessità -->
-    </div>
-  </div>
+  <!-- Contenitore della mappa -->
+  <div id="map"></div>
   
-  <!-- Inclusione della libreria Panzoom da CDN -->
-  <script src="https://unpkg.com/@panzoom/panzoom@9.4.0/dist/panzoom.min.js"></script>
+  <!-- Inclusione della libreria Leaflet -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Seleziona l'elemento da rendere interattivo
-    const mosaic = document.getElementById('mosaic');
+    // Parametri della griglia:
+    const tileSize = 150; // dimensione in pixel di ogni immagine
+    // Array con il percorso delle immagini (modifica in base ai nomi dei file nella cartella imgs)
+    const images = [
+      "imgs/img1.jpg",
+      "imgs/img2.jpg",
+      "imgs/img3.jpg",
+      "imgs/img4.jpg",
+      "imgs/img5.jpg",
+      "imgs/img6.jpg",
+      "imgs/img7.jpg",
+      "imgs/img8.jpg",
+      "imgs/img9.jpg"
+      // Aggiungi ulteriori immagini se presenti
+    ];
     
-    // Inizializza Panzoom sul contenitore del mosaico
-    const panzoomInstance = Panzoom(mosaic, {
-      maxScale: 4,       // scala massima raggiungibile
-      minScale: 0.5,     // scala minima
-      contain: 'outside' // permette di trascinare l'elemento al di fuori del viewport
+    // Definisci il numero di colonne: per esempio 3 colonne
+    const columns = 3;
+    // Calcola il numero di righe in base al numero totale di immagini
+    const rows = Math.ceil(images.length / columns);
+    
+    // Dimensioni totali della mappa (in pixel)
+    const mosaicWidth = columns * tileSize;
+    const mosaicHeight = rows * tileSize;
+    
+    // Inizializza la mappa con CRS.Simple per usare coordinate in pixel
+    const map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -1,       // zoom minimo (puoi regolare)
+      maxZoom: 4,        // zoom massimo
+      zoomControl: true  // attiva i controlli di zoom (pulsanti + e -)
     });
     
-    // Abilita lo zoom con la rotella del mouse (aggiungendo l'evento al contenitore)
-    document.getElementById('container').addEventListener('wheel', panzoomInstance.zoomWithWheel);
+    // Definisci i limiti della mappa (l'intera griglia)
+    const bounds = [[0, 0], [mosaicHeight, mosaicWidth]];
     
-    // Opzionale: cambia il cursore durante il pan
-    mosaic.addEventListener('panzoomstart', () => {
-      mosaic.style.cursor = 'grabbing';
-    });
-    mosaic.addEventListener('panzoomend', () => {
-      mosaic.style.cursor = 'grab';
-    });
+    // Centra la mappa sul centro del mosaico
+    const center = [mosaicHeight / 2, mosaicWidth / 2];
+    map.setView(center, 0);
+    
+    // Imposta i limiti della mappa per impedire di spostarsi troppo fuori dalla griglia
+    map.setMaxBounds(bounds);
+    
+    // Per ogni immagine, calcola la sua posizione nella griglia e aggiungi un overlay
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < columns; c++) {
+        const index = r * columns + c;
+        if (index >= images.length) break;
+        
+        // Calcola i confini del "tile" corrente:
+        // Coordinate superiori sinistre: [r * tileSize, c * tileSize]
+        // Coordinate inferiori destre: [(r+1) * tileSize, (c+1) * tileSize]
+        const tileBounds = [
+          [r * tileSize, c * tileSize],
+          [(r + 1) * tileSize, (c + 1) * tileSize]
+        ];
+        L.imageOverlay(images[index], tileBounds).addTo(map);
+      }
+    }
   </script>
 </body>
 </html>
