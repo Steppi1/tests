@@ -16,12 +16,6 @@
     .leaflet-tile {
       image-rendering: pixelated;
     }
-    .custom-tile {
-      width: 256px;
-      height: 256px;
-      background-size: cover;
-      background-position: center;
-    }
   </style>
 </head>
 <body>
@@ -32,9 +26,9 @@
       crs: L.CRS.Simple,
       minZoom: -4,
       maxZoom: 4,
-      zoomSnap: 0.25,
-      zoomDelta: 0.25,
-      wheelPxPerZoomLevel: 60,
+      zoomSnap: 0.05, // zoom molto più fluido
+      zoomDelta: 0.05,
+      wheelPxPerZoomLevel: 100,
       zoomControl: false,
     });
 
@@ -42,26 +36,38 @@
     map.setView(center, 0.5);
 
     const tileSize = 256;
-    const gridSize = 20; // controls spread
+    const gridSize = 20;
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
 
     function randomImage() {
       return images[Math.floor(Math.random() * images.length)];
     }
 
-    for (let x = -gridSize; x <= gridSize; x++) {
-      for (let y = -gridSize; y <= gridSize; y++) {
+    function addImageOverlay(imageUrl, x, y) {
+      const img = new Image();
+      img.onload = () => {
+        const w = img.width;
+        const h = img.height;
+        const ratio = tileSize / Math.max(w, h);
+        const displayW = w * ratio;
+        const displayH = h * ratio;
         const topLeft = [x * tileSize, y * tileSize];
         const bounds = [
           [topLeft[1], topLeft[0]],
-          [topLeft[1] + tileSize, topLeft[0] + tileSize]
+          [topLeft[1] + displayH, topLeft[0] + displayW]
         ];
-        const url = randomImage();
-        L.imageOverlay(url, bounds).addTo(map);
+        L.imageOverlay(imageUrl, bounds).addTo(map);
+      };
+      img.src = imageUrl;
+    }
+
+    for (let x = -gridSize; x <= gridSize; x++) {
+      for (let y = -gridSize; y <= gridSize; y++) {
+        const img = randomImage();
+        addImageOverlay(img, x, y);
       }
     }
 
-    // Centered on reload
     map.setView(center, 0.5);
   </script>
 </body>
