@@ -26,10 +26,14 @@
       crs: L.CRS.Simple,
       minZoom: -4,
       maxZoom: 4,
-      zoomSnap: 0.001, // super smooth zoom
-      zoomDelta: 0.001,
-      wheelPxPerZoomLevel: 50, // aumenta la sensibilità dello zoom
+      zoomSnap: 0, // disabilitato per consentire fluidità assoluta
+      zoomDelta: 0.25, // step realistico per zoom
+      wheelPxPerZoomLevel: 60, // comportamento più simile a Google Maps
       zoomControl: false,
+      inertia: true,
+      inertiaDeceleration: 3000, // maggiore decelerazione = più fluido
+      scrollWheelZoom: true, // assicurato attivo
+      wheelDebounceTime: 10 // riduce lag tra rotelle
     });
 
     const center = [0, 0];
