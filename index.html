@@ -17,6 +17,8 @@
     }
     .image-marker {
       pointer-events: none; /* niente click per ora */
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
@@ -49,6 +51,11 @@
     const imagesPerRow = 10;
     const spacing = tileSize; // tutte attaccate
 
+    // Crea una funzione per generare colori casuali
+    function getRandomColor() {
+      return Math.random() > 0.5 ? 'red' : 'green'; // alterna tra rosso e verde
+    }
+
     // Carica "immagini" colorate e le piazza in una griglia spostata random
     for (let i = 0; i < numImages; i++) {
       const row = Math.floor(i / imagesPerRow);
@@ -68,15 +75,17 @@
         [y + tileSize, x + tileSize]
       ];
 
-      // Crea un colore random per ogni "immagine"
-      const color = `hsl(${Math.random() * 360}, 100%, 50%)`; // colore casuale
+      // Crea un colore random (rosso o verde)
+      const color = getRandomColor();
 
-      // Crea un quadrato colorato come immagine
-      const imageUrl = `https://via.placeholder.com/${tileSize}?text=${i + 1}&bg=${color.slice(4, -1)}`;
+      // Crea una "immagine" colorata (un quadrato rosso o verde)
+      const divIcon = L.divIcon({
+        className: 'image-marker',
+        html: `<div style="width: ${tileSize}px; height: ${tileSize}px; background-color: ${color};"></div>`,
+        iconSize: [tileSize, tileSize]
+      });
 
-      L.imageOverlay(imageUrl, imageBounds, {
-        className: 'image-marker'
-      }).addTo(map);
+      L.marker([y + tileSize / 2, x + tileSize / 2], { icon: divIcon }).addTo(map);
     }
   </script>
 </body>
