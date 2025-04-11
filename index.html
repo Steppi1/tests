@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Color Grid Map</title>
+  <title>Grid Map Zoom</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     html, body {
@@ -16,9 +16,7 @@
       height: 100%;
     }
     .tile {
-      width: 200px;
-      height: 200px;
-      border: 2px solid white;
+      border: none;
       box-sizing: border-box;
       font-size: 20px;
       color: white;
@@ -37,20 +35,22 @@
   <script>
     const map = L.map('map', {
       crs: L.CRS.Simple,
-      minZoom: -3,
-      maxZoom: 3,
+      minZoom: -2,
+      maxZoom: 5,
       zoomControl: true,
-      attributionControl: false
+      attributionControl: false,
+      zoomSnap: 0.1
     });
 
     const cols = 5;
     const rows = 5;
     const tileSize = 200;
+
+    // Calcoliamo larghezza e altezza mappa
     const width = cols * tileSize;
     const height = rows * tileSize;
-
-    map.setView([height / 2, width / 2], 0);
-    map.setMaxBounds([[0, 0], [height, width]]);
+    map.setView([height / 2, width / 2], 1); // più zoomato
+    map.setMaxBounds([[0, 0], [height * 2, width * 2]]); // lascia un po' di margine extra
 
     const colors = ['red', 'green', 'blue', 'purple', 'orange'];
 
@@ -60,11 +60,15 @@
         const y = row * tileSize;
         const color = colors[(row + col) % colors.length];
 
+        // Dimensioni diverse random ma fisse (multipli di 100)
+        const w = 100 + (Math.floor(Math.random() * 3) * 100);
+        const h = 100 + (Math.floor(Math.random() * 3) * 100);
+
         const icon = L.divIcon({
           className: '',
           iconAnchor: [0, 0],
-          iconSize: [tileSize, tileSize],
-          html: `<div class="tile" style="background:${color}">${row},${col}</div>`
+          iconSize: [w, h],
+          html: `<div class="tile" style="width:${w}px;height:${h}px;background:${color}">${w}x${h}</div>`
         });
 
         L.marker([y, x], { icon, interactive: false }).addTo(map);
