@@ -5,38 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mappa Interattiva a Mosaico</title>
   <style>
-    /* Rimuove margini e padding e assicura che la pagina occupi l'intera viewport */
+    /* Elimina margini e padding, occupa l'intera viewport */
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
     }
-    /* Contenitore principale che copre l'intera finestra */
+    /* Contenitore che occupa l'intera finestra con sfondo scuro */
     #container {
       width: 100vw;
       height: 100vh;
+      background: #222;
       position: relative;
-      background: #222; /* sfondo scuro */
     }
-    /* La griglia "mosaic" è posizionata al centro del contenitore */
+    /* Il mosaico viene centrato grazie ad absolute positioning e transform */
     #mosaic {
       position: absolute;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
       display: grid;
-      /* 8 colonne, ciascuna larga 150px (modifica liberamente) */
+      /* Definisce 8 colonne fisse (modifica se necessario) */
       grid-template-columns: repeat(8, 150px);
-      /* Se vuoi più righe automaticamente, puoi impostare la proprietà qui sotto:
-         grid-auto-rows: 150px; 
-         Non la usiamo in questo caso perché genereremo le righe con un ciclo JS */
-      gap: 0; /* niente spazio fra le celle, per effetto puzzle */
+      grid-auto-rows: 150px;
+      gap: 0; /* nessuno spazio tra le celle per l'effetto puzzle */
       cursor: grab;
     }
-    /* Ogni immagine riempie esattamente una cella 150x150,
-       mantenendo la proporzione grazie a object-fit: cover */
+    /* Le celle del mosaico: ogni immagine si adatta a una cella 150x150, coprendo lo spazio */
     #mosaic img {
       width: 150px;
       height: 150px;
@@ -48,16 +45,17 @@
 <body>
   <div id="container">
     <div id="mosaic">
-      <!-- Le immagini vengono inserite in modo dinamico da JavaScript -->
+      <!-- Le immagini verranno aggiunte dinamicamente tramite JavaScript -->
     </div>
   </div>
-  
-  <!-- Inclusione della libreria Panzoom da CDN -->
+
+  <!-- Includiamo Panzoom tramite CDN -->
   <script src="https://unpkg.com/@panzoom/panzoom@9.4.0/dist/panzoom.min.js"></script>
   <script>
-    /*********************************************************
-     * 1) Definizione delle immagini e generazione del mosaico
-     *********************************************************/
+    /*****************************************
+     * 1) Generazione del mosaico di immagini
+     *****************************************/
+    // Array con i percorsi delle immagini (nome esatto: "img 1.png", "img 2.png", … "img 8.png")
     const baseImages = [
       "imgs/img 1.png",
       "imgs/img 2.png",
@@ -69,14 +67,10 @@
       "imgs/img 8.png"
     ];
     
-    // Numero di volte in cui ripetere l'array base (righe)
-    const repeats = 4;
+    // Numero di volte in cui ripetere l'array base per ottenere più righe
+    const repeats = 4; // Puoi aumentare o diminuire questo numero
     
-    // Seleziona l'elemento #mosaic
     const mosaic = document.getElementById('mosaic');
-    
-    // Crea tante righe quante specificate in 'repeats',
-    // concatenando in ognuna tutte le 8 immagini
     for (let r = 0; r < repeats; r++) {
       for (let i = 0; i < baseImages.length; i++) {
         const img = document.createElement('img');
@@ -85,61 +79,46 @@
         mosaic.appendChild(img);
       }
     }
-    
-    /****************************************************
-     * 2) Configurazione di Panzoom per zoom e pan liberi
-     ****************************************************/
-    // Inizializza Panzoom sul contenitore del mosaico
-    const panzoomInstance = Panzoom(mosaic, {
-      maxScale: 4,   // livello di zoom massimo
-      minScale: 1,   // livello di zoom minimo
-      contain: false // disabilitiamo la containment automatica per i "muri" personalizzati
-    });
-    
-    // Abilita lo zoom con la rotella del mouse sull'intero contenitore
-    document.getElementById('container')
-      .addEventListener('wheel', panzoomInstance.zoomWithWheel);
-    
-    // Imposta il pan (0,0) e uno zoom iniziale (qui 1.5)
-    panzoomInstance.pan(0, 0, { animate: false });
-    panzoomInstance.zoom(1.5, { animate: false });
-    
-    /*************************************************************
-     * 3) Definizione dei "muri invisibili" per non uscire troppo
-     *************************************************************/
-    // Dimensione della cella (larghezza e altezza in px)
-    const cellSize = 150;
-    // Stesso numero di colonne definito in CSS
-    const columns = 8;
-    // Numero di righe corrisponde a 'repeats'
-    const rows = repeats;
-    
-    // Dimensioni totali del mosaico in px
-    const mosaicWidth = columns * cellSize;   // 8 * 150 = 1200
-    const mosaicHeight = rows * cellSize;     // 4 * 150 = 600
-    
-    // Margine extra oltre la zona delle immagini
-    const margin = 400; // puoi ingrandire/ridurre a piacere
-    
-    // Calcoliamo i limiti per X e Y (centrati)
+
+    /*****************************************
+     * 2) Calcolo delle dimensioni del mosaico
+     *****************************************/
+    const cellSize = 150;    // Dimensione fissa di ogni cella (in pixel)
+    const columns = 8;       // Numero di colonne
+    const rows = repeats;    // Il numero di righe equivale a "repeats"
+    const mosaicWidth = columns * cellSize;
+    const mosaicHeight = rows * cellSize;
+    // Margine extra oltre la zona delle immagini (modificabile a piacere)
+    const margin = 400;
+    // Limiti massimi per il pan rispetto al centro (0,0)
     const maxPanX = mosaicWidth / 2 + margin;
     const maxPanY = mosaicHeight / 2 + margin;
     
-    // Al termine di una fase di pan, se l'utente ha spostato troppo,
-    // "clampiamo" la posizione (senza far rimbalzare).
-    mosaic.addEventListener('panzoomend', () => {
-      const pan = panzoomInstance.getPan();
-      let newX = Math.max(-maxPanX, Math.min(maxPanX, pan.x));
-      let newY = Math.max(-maxPanY, Math.min(maxPanY, pan.y));
-      if (newX !== pan.x || newY !== pan.y) {
-        panzoomInstance.pan(newX, newY, { animate: false });
+    /*****************************************
+     * 3) Inizializzazione di Panzoom con limiti
+     *****************************************/
+    const panzoomInstance = Panzoom(mosaic, {
+      maxScale: 4,
+      minScale: 1,
+      contain: false, // Gestiamo i limiti con beforePan
+      beforePan: (oldPan, newPan) => {
+        // Clampa il nuovo pan entro i limiti definiti per x e y
+        let newX = newPan.x;
+        let newY = newPan.y;
+        if (newX < -maxPanX) newX = -maxPanX;
+        if (newX > maxPanX) newX = maxPanX;
+        if (newY < -maxPanY) newY = -maxPanY;
+        if (newY > maxPanY) newY = maxPanY;
+        return { x: newX, y: newY };
       }
     });
     
-    /*****************************************
-     * Fine: la pagina si caricherà centrata,
-     * zoom già a 1.5 e con sfondo scuro.
-     *****************************************/
+    // Abilita lo zoom con la rotella del mouse sull'intero contenitore
+    document.getElementById('container').addEventListener('wheel', panzoomInstance.zoomWithWheel);
+    
+    // Imposta la vista iniziale: centro del mosaico con uno zoom di 1.5
+    panzoomInstance.pan(0, 0, { animate: false });
+    panzoomInstance.zoom(1.5, { animate: false });
   </script>
 </body>
 </html>
