@@ -4,62 +4,117 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Masonry Map Navigation</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    html, body, #map {
+    html, body {
       margin: 0;
       padding: 0;
+      overflow: hidden;
       height: 100%;
       width: 100%;
       background: #000;
     }
-    .leaflet-tile {
-      image-rendering: pixelated;
+    #wrapper {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      touch-action: none;
+      cursor: grab;
+    }
+    #panzoom {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      transform-origin: 0 0;
+      display: grid;
+      grid-auto-flow: dense;
+    }
+    .tile {
+      width: 256px;
+      height: 256px;
+    }
+    .tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <div id="map"></div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <div id="wrapper">
+    <div id="panzoom"></div>
+  </div>
+
   <script>
-    const map = L.map('map', {
-      crs: L.CRS.Simple,
-      zoomControl: false,
-      scrollWheelZoom: 'center', // zoom centrato sul cursore, senza lag
-      inertia: true,
-      inertiaDeceleration: 5000, // più fluido
-      wheelDebounceTime: 0, // elimina ritardo zoom
-      wheelPxPerZoomLevel: 50 // reattività più naturale
-    });
+    const wrapper = document.getElementById('wrapper');
+    const panzoomEl = document.getElementById('panzoom');
 
-    const center = [0, 0];
-    map.setView(center, 0.5);
-
-    const tileSize = 256;
-    const gridSize = 20;
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
+    const gridSize = 20;
 
     function randomImage() {
       return images[Math.floor(Math.random() * images.length)];
     }
 
-    function addImageOverlay(imageUrl, x, y) {
-      const bounds = [
-        [y * tileSize, x * tileSize],
-        [(y + 1) * tileSize, (x + 1) * tileSize]
-      ];
-      L.imageOverlay(imageUrl, bounds, { interactive: false }).addTo(map);
-    }
-
     for (let x = -gridSize; x <= gridSize; x++) {
       for (let y = -gridSize; y <= gridSize; y++) {
-        const img = randomImage();
-        addImageOverlay(img, x, y);
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.style.gridColumn = x + gridSize + 1;
+        tile.style.gridRow = y + gridSize + 1;
+
+        const img = document.createElement('img');
+        img.src = randomImage();
+        tile.appendChild(img);
+        panzoomEl.appendChild(tile);
       }
     }
 
-    map.setZoom(0.5);
-    map.setView(center);
+    let scale = 1;
+    let originX = 0;
+    let originY = 0;
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+
+    function updateTransform() {
+      panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
+    }
+
+    wrapper.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = -e.deltaY * 0.001;
+      const rect = wrapper.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left - originX;
+      const offsetY = e.clientY - rect.top - originY;
+
+      const newScale = Math.min(Math.max(0.1, scale * (1 + delta)), 5);
+      originX -= offsetX * (newScale / scale - 1);
+      originY -= offsetY * (newScale / scale - 1);
+      scale = newScale;
+      updateTransform();
+    }, { passive: false });
+
+    wrapper.addEventListener('pointerdown', (e) => {
+      isPanning = true;
+      startX = e.clientX - originX;
+      startY = e.clientY - originY;
+      wrapper.setPointerCapture(e.pointerId);
+    });
+
+    wrapper.addEventListener('pointermove', (e) => {
+      if (!isPanning) return;
+      originX = e.clientX - startX;
+      originY = e.clientY - startY;
+      updateTransform();
+    });
+
+    wrapper.addEventListener('pointerup', () => {
+      isPanning = false;
+    });
+
+    updateTransform();
   </script>
 </body>
 </html>
