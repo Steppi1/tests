@@ -30,8 +30,6 @@
     #panzoom {
   width: 150vmax;
   height: 150vmax;
-  column-width: 300px;
-  column-count: auto;
   column-gap: 0;
   position: absolute;
   top: 0;
@@ -54,11 +52,22 @@
   height: auto;
   user-select: none;
   pointer-events: none;
-  margin: 0;
+  margin: 2px;
   padding: 0;
   box-sizing: border-box;
 }
-  </style>
+  @media (max-width: 768px) {
+  #panzoom {
+    column-width: 150px;
+  }
+}
+
+@media (min-width: 769px) {
+  #panzoom {
+    column-width: 400px;
+  }
+}
+</style>
 </head>
 <body>
   <div id="wrapper">
