@@ -9,12 +9,12 @@
       margin: 0;
       height: 100%;
       overflow: hidden;
+      background-color: #222;
     }
 
     #viewport {
       width: 100%;
       height: 100%;
-      background-color: #222;
       overflow: hidden;
       position: relative;
       cursor: grab;
@@ -23,6 +23,8 @@
     #grid {
       position: absolute;
       will-change: transform;
+      top: 0;
+      left: 0;
     }
 
     .image {
@@ -45,127 +47,86 @@
   </div>
 
   <script>
-    // Funzione per caricare tutte le immagini dalla cartella 'imgs' su GitHub Pages
+    // Carica le immagini dalla cartella "imgs"
+    const images = [
+      "imgs/Unknown-1.jpeg",
+      "imgs/Unknown.jpeg",
+      "imgs/images-1.jpeg",
+      "imgs/images.jpeg",
+      "imgs/image5.jpg"
+      // Aggiungi altre immagini qui
+    ];
+
+    const gridElement = document.getElementById("grid");
+
+    // Posizione e zoom iniziali
+    let position = { x: 0, y: 0 };
+    let zoomLevel = 1;
+    
+    // Funzione per creare le immagini
     function loadImages() {
-      const gridElement = document.getElementById('grid');
-      
-      // Lista fittizia per testare (aggiungi le tue immagini qui)
-      const imageList = [
-        'img1.jpg', 'img2.jpg', 'img3.jpg', 'img4.jpg', 'img5.jpg', // metti qui i nomi reali delle tue immagini
-      ];
-
-      const imgWidth = 200;  // Larghezza media
-      const imgHeight = 200; // Altezza media
-
-      // Genera e posiziona immagini
-      imageList.forEach((imageName, index) => {
-        const img = document.createElement('img');
-        img.classList.add('image');
-        img.src = `imgs/${imageName}`; // Le immagini sono caricate dalla cartella imgs
-
-        // Generazione dimensioni casuali
-        const randomWidth = Math.floor(Math.random() * (imgWidth * 1.5)) + imgWidth;
-        const randomHeight = Math.floor(Math.random() * (imgHeight * 1.5)) + imgHeight;
+      images.forEach((imageSrc, index) => {
+        const img = document.createElement("img");
+        img.src = imageSrc;
+        img.className = "image";
         
-        img.style.width = `${randomWidth}px`;
-        img.style.height = `${randomHeight}px`;
+        // Imposta le immagini in una posizione casuale per esempio
+        const xPos = (index % 5) * 500;  // Regola la distanza tra le immagini
+        const yPos = Math.floor(index / 5) * 500;
 
-        // Posizionamento casuale ma senza sovrapposizione
-        const leftPosition = Math.random() * window.innerWidth;
-        const topPosition = Math.random() * window.innerHeight;
-
-        img.style.left = `${leftPosition}px`;
-        img.style.top = `${topPosition}px`;
+        img.style.left = `${xPos}px`;
+        img.style.top = `${yPos}px`;
 
         gridElement.appendChild(img);
       });
     }
 
-    // Parametri per la mappa e zoom
-    const minZoom = 0.5;
-    const maxZoom = 3;
-    let currentZoom = 1;
-    let isMouseDown = false;
-    let startX, startY, scrollLeft, scrollTop;
-
-    const gridElement = document.getElementById('grid');
-    const viewportElement = document.getElementById('viewport');
-
-    // Funzione per gestire il movimento della griglia
-    function handleMouseMove(e) {
-      if (!isMouseDown) return;
-
-      e.preventDefault();
-      const x = e.pageX - viewportElement.offsetLeft;
-      const y = e.pageY - viewportElement.offsetTop;
-      const walkX = (x - startX) * 1;  // Velocità di spostamento orizzontale
-      const walkY = (y - startY) * 1;  // Velocità di spostamento verticale
-
-      gridElement.scrollLeft = scrollLeft - walkX;
-      gridElement.scrollTop = scrollTop - walkY;
+    // Funzione di zoom
+    function zoom(event) {
+      event.preventDefault();
+      const scale = event.deltaY < 0 ? 1.1 : 0.9;  // Se la rotella va su zoom in, altrimenti zoom out
+      zoomLevel *= scale;
+      zoomLevel = Math.min(Math.max(zoomLevel, 0.5), 5);  // Limita lo zoom tra 0.5x e 5x
+      updateZoom();
     }
 
-    // Attivazione dello spostamento quando il mouse è premuto
-    viewportElement.addEventListener('mousedown', (e) => {
-      isMouseDown = true;
-      startX = e.pageX - gridElement.offsetLeft;
-      startY = e.pageY - gridElement.offsetTop;
-      scrollLeft = gridElement.scrollLeft;
-      scrollTop = gridElement.scrollTop;
+    // Funzione per aggiornare lo zoom
+    function updateZoom() {
+      gridElement.style.transform = `scale(${zoomLevel})`;
+    }
+
+    // Funzione di navigazione (muovi la mappa)
+    let isDragging = false;
+    let startX, startY;
+    
+    function startDrag(e) {
+      isDragging = true;
+      startX = e.clientX - position.x;
+      startY = e.clientY - position.y;
       document.body.style.cursor = 'grabbing';
-    });
+    }
 
-    // Disattivazione dello spostamento quando il mouse è rilasciato
-    document.addEventListener('mouseup', () => {
-      isMouseDown = false;
-      document.body.style.cursor = 'grab';
-    });
-
-    // Gestione dello zoom
-    viewportElement.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const zoomDirection = e.deltaY < 0 ? 1 : -1;
-      const newZoom = currentZoom + zoomDirection * 0.05; // Zoom meno rapido
-      currentZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
-
-      // Calcola il punto di zoom in base alla posizione del cursore
-      const scaleFactor = currentZoom / (currentZoom - zoomDirection * 0.05);
-      const offsetX = (e.pageX - viewportElement.offsetLeft) * (1 - scaleFactor);
-      const offsetY = (e.pageY - viewportElement.offsetTop) * (1 - scaleFactor);
-
-      gridElement.style.transformOrigin = `${offsetX}px ${offsetY}px`;
-      gridElement.style.transform = `scale(${currentZoom})`;
-    });
-
-    // Funzione per far ripetere la griglia come stile Pac-Man
-    function repeatGrid() {
-      gridElement.style.transform = `scale(${currentZoom})`;
-
-      const width = gridElement.offsetWidth;
-      const height = gridElement.offsetHeight;
-
-      if (gridElement.scrollLeft > width) {
-        gridElement.scrollLeft = 0;
-      }
-      if (gridElement.scrollTop > height) {
-        gridElement.scrollTop = 0;
-      }
-      if (gridElement.scrollLeft < 0) {
-        gridElement.scrollLeft = width;
-      }
-      if (gridElement.scrollTop < 0) {
-        gridElement.scrollTop = height;
+    function drag(e) {
+      if (isDragging) {
+        position.x = e.clientX - startX;
+        position.y = e.clientY - startY;
+        gridElement.style.transform = `translate(${position.x}px, ${position.y}px) scale(${zoomLevel})`;
       }
     }
 
-    // Chiamata iniziale
-    window.onload = function() {
-      loadImages();
-    };
+    function stopDrag() {
+      isDragging = false;
+      document.body.style.cursor = 'grab';
+    }
 
-    // Funzione di ripetizione continua del blocco in stile pacman
-    setInterval(repeatGrid, 50);
+    // Aggiungi gli event listener per lo zoom e la navigazione
+    document.getElementById("viewport").addEventListener("wheel", zoom);
+    gridElement.addEventListener("mousedown", startDrag);
+    document.addEventListener("mousemove", drag);
+    document.addEventListener("mouseup", stopDrag);
+
+    // Carica le immagini iniziali
+    loadImages();
   </script>
-
 </body>
 </html>
