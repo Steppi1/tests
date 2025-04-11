@@ -26,9 +26,9 @@
       crs: L.CRS.Simple,
       minZoom: -4,
       maxZoom: 4,
-      zoomSnap: 0.05, // zoom molto più fluido
-      zoomDelta: 0.05,
-      wheelPxPerZoomLevel: 100,
+      zoomSnap: 0.001, // super smooth zoom
+      zoomDelta: 0.001,
+      wheelPxPerZoomLevel: 50, // aumenta la sensibilità dello zoom
       zoomControl: false,
     });
 
@@ -44,21 +44,11 @@
     }
 
     function addImageOverlay(imageUrl, x, y) {
-      const img = new Image();
-      img.onload = () => {
-        const w = img.width;
-        const h = img.height;
-        const ratio = tileSize / Math.max(w, h);
-        const displayW = w * ratio;
-        const displayH = h * ratio;
-        const topLeft = [x * tileSize, y * tileSize];
-        const bounds = [
-          [topLeft[1], topLeft[0]],
-          [topLeft[1] + displayH, topLeft[0] + displayW]
-        ];
-        L.imageOverlay(imageUrl, bounds).addTo(map);
-      };
-      img.src = imageUrl;
+      const bounds = [
+        [y * tileSize, x * tileSize],
+        [(y + 1) * tileSize, (x + 1) * tileSize]
+      ];
+      L.imageOverlay(imageUrl, bounds).addTo(map);
     }
 
     for (let x = -gridSize; x <= gridSize; x++) {
