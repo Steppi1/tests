@@ -2,263 +2,88 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mosaic Navigabile - Natural Dimensions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mappa Interattiva a Mosaico</title>
   <style>
+    /* Resetta margini e padding e imposta viewport a piena larghezza/altezza */
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
       overflow: hidden;
-      background: #222;
-      user-select: none;
-      touch-action: none;
-    }
-    /* Il viewport copre l'intero schermo e abilita la navigazione */
-    #viewport {
       width: 100%;
       height: 100%;
+    }
+    /* Contenitore che copre l'intera viewport */
+    #container {
+      width: 100vw;
+      height: 100vh;
       position: relative;
-      overflow: hidden;
+      background: #f0f0f0;
+    }
+    /* Il contenitore del mosaico:
+       - Posizionato assolutamente e centrato mediante left/top 50% + translate(-50%, -50%)
+       - Usando CSS grid per disporre le immagini in colonne fisse (qui 5 colonne da 150px ciascuna)
+       - Senza gap per ottenere l'effetto "puzzle" */
+    #mosaic {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: grid;
+      grid-template-columns: repeat(5, 150px); /* Modifica il numero delle colonne se necessario */
+      gap: 0;
       cursor: grab;
     }
-    /* Il container del mosaic: verrà posizionato e trasformato via JS */
-    #grid {
-      position: absolute;
-      top: 0;
-      left: 0;
-      will-change: transform;
-    }
-    /* Le immagini dentro il mosaic:
-       - vengono posizionate in modo assoluto secondo il layout calcolato,
-       - non hanno margini/niente padding,
-       - non sono draggabili (pointer-events: none). */
-    #grid img {
-      position: absolute;
-      margin: 0;
-      padding: 0;
-      pointer-events: none;
+    /* Stile per le immagini, che vengono ridimensionate per adattarsi a 150x150px;
+       object-fit: cover mantiene proporzioni adeguate tagliando eventuali eccedenze */
+    #mosaic img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <div id="viewport">
-    <div id="grid"></div>
+  <div id="container">
+    <div id="mosaic">
+      <!-- Sostituisci o aggiungi le immagini presenti nella cartella "imgs" -->
+      <img src="imgs/img1.jpg" alt="Immagine 1">
+      <img src="imgs/img2.jpg" alt="Immagine 2">
+      <img src="imgs/img3.jpg" alt="Immagine 3">
+      <img src="imgs/img4.jpg" alt="Immagine 4">
+      <img src="imgs/img5.jpg" alt="Immagine 5">
+      <img src="imgs/img6.jpg" alt="Immagine 6">
+      <img src="imgs/img7.jpg" alt="Immagine 7">
+      <img src="imgs/img8.jpg" alt="Immagine 8">
+      <img src="imgs/img9.jpg" alt="Immagine 9">
+      <!-- Puoi aggiungere altre immagini secondo le tue necessità -->
+    </div>
   </div>
+  
+  <!-- Inclusione della libreria Panzoom da CDN -->
+  <script src="https://unpkg.com/@panzoom/panzoom@9.4.0/dist/panzoom.min.js"></script>
   <script>
-    /**************************************************
-     * Caricamento e layout del mosaic
-     **************************************************/
-    // Lista dei percorsi delle immagini (modifica se necessario)
-    const imageFilenames = [
-      "imgs/Unknown-1.jpeg",
-      "imgs/Unknown.jpeg",
-      "imgs/images-1.jpeg",
-      "imgs/images.jpeg",
-      "imgs/image5.jpg"
-    ];
-    // Per avere un mosaic denso ripetiamo la lista più volte
-    const repeatFactor = 8; // Totale immagini = imageFilenames.length * repeatFactor
-    const mosaicImageSources = [];
-    for (let i = 0; i < repeatFactor; i++){
-      imageFilenames.forEach(src => mosaicImageSources.push(src));
-    }
+    // Seleziona l'elemento da rendere interattivo
+    const mosaic = document.getElementById('mosaic');
     
-    // Funzione che carica un'immagine e restituisce le sue dimensioni naturali
-    function loadImage(src) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => resolve({
-          src: src,
-          width: img.naturalWidth,
-          height: img.naturalHeight
-        });
-        img.onerror = () => reject(new Error("Failed to load: " + src));
-      });
-    }
+    // Inizializza Panzoom sul contenitore del mosaico
+    const panzoomInstance = Panzoom(mosaic, {
+      maxScale: 4,       // scala massima raggiungibile
+      minScale: 0.5,     // scala minima
+      contain: 'outside' // permette di trascinare l'elemento al di fuori del viewport
+    });
     
-    // Carica tutte le immagini
-    Promise.all(mosaicImageSources.map(loadImage))
-      .then(imagesData => {
-        // Layout: disponi le immagini in righe senza spazi, senza forzare dimensioni.
-        // Adottiamo un target per la larghezza di riga.
-        const targetRowWidth = 1200;
-        let rows = [];
-        let currentRow = [];
-        let currentRowWidth = 0;
-        let currentRowHeight = 0;
-        for (let data of imagesData) {
-          // Se la riga non è vuota e aggiungendo l'immagine si supera il target,
-          // inizia una nuova riga.
-          if (currentRow.length > 0 && (currentRowWidth + data.width) > targetRowWidth) {
-            rows.push({ images: currentRow, rowWidth: currentRowWidth, rowHeight: currentRowHeight });
-            currentRow = [];
-            currentRowWidth = 0;
-            currentRowHeight = 0;
-          }
-          currentRow.push(data);
-          currentRowWidth += data.width;
-          currentRowHeight = Math.max(currentRowHeight, data.height);
-        }
-        if (currentRow.length > 0) {
-          rows.push({ images: currentRow, rowWidth: currentRowWidth, rowHeight: currentRowHeight });
-        }
-        
-        // Calcola le dimensioni complessive del mosaic.
-        const mosaicWidth = Math.max(...rows.map(row => row.rowWidth));
-        const mosaicHeight = rows.reduce((sum, row) => sum + row.rowHeight, 0);
-        
-        // Calcola le posizioni: per ogni riga, le immagini vengono posizionate
-        // una accanto all'altra (x cumulativo) e y aumenta in base all'altezza della riga.
-        let positionedImages = [];
-        let yPos = 0;
-        for (let row of rows) {
-          let xPos = 0;
-          for (let data of row.images) {
-            positionedImages.push({
-              src: data.src,
-              x: xPos,
-              y: yPos,
-              width: data.width,
-              height: data.height
-            });
-            xPos += data.width;
-          }
-          yPos += row.rowHeight;
-        }
-        
-        // Imposta le dimensioni del container #grid in base al mosaic calcolato.
-        const grid = document.getElementById("grid");
-        grid.style.width = mosaicWidth + "px";
-        grid.style.height = mosaicHeight + "px";
-        
-        // Aggiunge le immagini al container posizionandole assolutamente.
-        positionedImages.forEach(data => {
-          const imgEl = document.createElement("img");
-          imgEl.src = data.src;
-          // Lascia le dimensioni naturali, posiziona con left/top calcolati.
-          imgEl.style.left = data.x + "px";
-          imgEl.style.top = data.y + "px";
-          grid.appendChild(imgEl);
-        });
-        
-        // Inizializza pan e zoom partendo dalle dimensioni calcolate.
-        initPanZoom(mosaicWidth, mosaicHeight);
-      })
-      .catch(err => {
-        console.error(err);
-      });
-      
-    /**************************************************
-     * Pan & Zoom: funziona in modo standard come in Figma
-     **************************************************/
-    let zoomLevel = 1.0;
-    let translation = { x: 0, y: 0 };
-    const minZoom = 0.5;
-    const maxZoom = 5;
+    // Abilita lo zoom con la rotella del mouse (aggiungendo l'evento al contenitore)
+    document.getElementById('container').addEventListener('wheel', panzoomInstance.zoomWithWheel);
     
-    const viewport = document.getElementById("viewport");
-    const grid = document.getElementById("grid");
-    
-    function updateTransform() {
-      grid.style.transform = `translate(${translation.x}px, ${translation.y}px) scale(${zoomLevel})`;
-    }
-    
-    // Centra il mosaic nel viewport in base alle dimensioni attuali e allo zoom
-    function centerGrid(mosaicWidth, mosaicHeight) {
-      const vpWidth = viewport.clientWidth;
-      const vpHeight = viewport.clientHeight;
-      translation.x = (vpWidth - mosaicWidth * zoomLevel) / 2;
-      translation.y = (vpHeight - mosaicHeight * zoomLevel) / 2;
-      updateTransform();
-    }
-    
-    function initPanZoom(mosaicWidth, mosaicHeight) {
-      // Centra inizialmente
-      centerGrid(mosaicWidth, mosaicHeight);
-      
-      /***** PAN con mouse e touch *****/
-      let isPanning = false;
-      let panStart = { x: 0, y: 0 };
-      let startTranslation = { x: 0, y: 0 };
-      
-      function onDragStart(clientX, clientY) {
-        isPanning = true;
-        panStart = { x: clientX, y: clientY };
-        startTranslation = { ...translation };
-        viewport.style.cursor = "grabbing";
-        grid.style.transition = "none";
-      }
-      function onDragMove(clientX, clientY) {
-        if (!isPanning) return;
-        const dx = clientX - panStart.x;
-        const dy = clientY - panStart.y;
-        translation.x = startTranslation.x + dx;
-        translation.y = startTranslation.y + dy;
-        updateTransform();
-      }
-      function onDragEnd() {
-        if (!isPanning) return;
-        isPanning = false;
-        viewport.style.cursor = "grab";
-        // Se l'intero mosaic è fuori dal viewport (spazio nero totale), anima il ritorno al centro
-        const vpRect = viewport.getBoundingClientRect();
-        const gridRect = grid.getBoundingClientRect();
-        const completelyOff = (gridRect.right < vpRect.left || gridRect.left > vpRect.right ||
-                                 gridRect.bottom < vpRect.top || gridRect.top > vpRect.bottom);
-        if (completelyOff) {
-          grid.style.transition = "transform 0.5s ease-out";
-          centerGrid(mosaicWidth, mosaicHeight);
-          setTimeout(() => { grid.style.transition = ""; }, 600);
-        }
-      }
-      
-      // Mouse events
-      viewport.addEventListener("mousedown", (e) => {
-        onDragStart(e.clientX, e.clientY);
-      });
-      window.addEventListener("mousemove", (e) => {
-        onDragMove(e.clientX, e.clientY);
-      });
-      window.addEventListener("mouseup", onDragEnd);
-      
-      // Touch events
-      viewport.addEventListener("touchstart", (e) => {
-        if (e.touches.length === 1) {
-          onDragStart(e.touches[0].clientX, e.touches[0].clientY);
-        }
-      }, {passive: false});
-      viewport.addEventListener("touchmove", (e) => {
-        if (!isPanning || e.touches.length !== 1) return;
-        onDragMove(e.touches[0].clientX, e.touches[0].clientY);
-        e.preventDefault();
-      }, {passive: false});
-      viewport.addEventListener("touchend", onDragEnd);
-      
-      /***** ZOOM via wheel (behave come in Figma) *****/
-      viewport.addEventListener("wheel", (e) => {
-        e.preventDefault();
-        const rect = viewport.getBoundingClientRect();
-        // Posizione del puntatore nel viewport
-        const pointer = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        };
-        const oldZoom = zoomLevel;
-        // Fattore zoom: piccole variazioni per uno zoom "normale"
-        const zoomFactor = e.deltaY < 0 ? 1.05 : 0.95;
-        let newZoom = oldZoom * zoomFactor;
-        newZoom = Math.min(Math.max(newZoom, minZoom), maxZoom);
-        
-        // Calcola la nuova translation in modo che il punto sotto il cursore resti fisso.
-        translation.x = pointer.x - (pointer.x - translation.x) * (newZoom / oldZoom);
-        translation.y = pointer.y - (pointer.y - translation.y) * (newZoom / oldZoom);
-        
-        zoomLevel = newZoom;
-        updateTransform();
-      }, {passive: false});
-    }
+    // Opzionale: cambia il cursore durante il pan
+    mosaic.addEventListener('panzoomstart', () => {
+      mosaic.style.cursor = 'grabbing';
+    });
+    mosaic.addEventListener('panzoomend', () => {
+      mosaic.style.cursor = 'grab';
+    });
   </script>
 </body>
 </html>
