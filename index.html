@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mappa Immagini Puzzle</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masonry Map</title>
   <style>
     html, body {
       margin: 0;
@@ -11,88 +11,102 @@
       overflow: hidden;
       height: 100%;
       width: 100%;
-      background: #000;
-    }
-    #viewport {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
+      background: #111;
     }
     #container {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       display: grid;
       grid-auto-flow: dense;
-      grid-template-columns: repeat(auto-fill, 100px);
-      gap: 0;
+      gap: 0px;
     }
-    #container img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
+    .tile {
+      box-sizing: border-box;
+      padding: 1px;
+    }
+    .tile img {
       display: block;
-      border: 0.5px solid #000;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@9.4.0/dist/panzoom.min.js" defer></script>
 </head>
 <body>
   <div id="viewport">
     <div id="container"></div>
   </div>
+
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('container');
-      const imageCount = 8;
-      const totalImages = 200;
+    const container = document.getElementById('container');
+    const viewport = document.getElementById('viewport');
 
-      function getImageSrc(index) {
-        return `https://picsum.photos/seed/${index}/100/100`;
-      }
+    let images = [];
+    for (let i = 1; i <= 8; i++) {
+      images.push(`imgs/img ${i}.png`);
+    }
 
-      for (let i = 0; i < totalImages; i++) {
-        const imgNum = Math.floor(Math.random() * imageCount) + 1;
+    const tileSize = 150;
+    const gridSize = 40;
+    let tileMap = new Set();
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function key(x, y) {
+      return `${x},${y}`;
+    }
+
+    function placeTiles(centerX, centerY, count) {
+      for (let i = 0; i < count; i++) {
+        let x, y;
+        do {
+          x = randomInt(-gridSize, gridSize);
+          y = randomInt(-gridSize, gridSize);
+        } while (tileMap.has(key(x, y)));
+
+        tileMap.add(key(x, y));
+
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.style.gridColumn = `${centerX + x}`;
+        tile.style.gridRow = `${centerY + y}`;
+
         const img = document.createElement('img');
-        img.src = getImageSrc(imgNum);
-        container.appendChild(img);
+        img.src = images[randomInt(0, images.length - 1)];
+
+        tile.appendChild(img);
+        container.appendChild(tile);
       }
+    }
 
-      const columns = Math.ceil(Math.sqrt(totalImages));
-      const rows = Math.ceil(totalImages / columns);
-      const containerWidth = columns * 100;
-      const containerHeight = rows * 100;
-      container.style.width = `${containerWidth}px`;
-      container.style.height = `${containerHeight}px`;
+    function resetGrid() {
+      container.innerHTML = '';
+      tileMap.clear();
+      placeTiles(gridSize, gridSize, 400); // 400 tiles around center
+    }
 
-      function initializePanzoom() {
-        if (typeof Panzoom === 'undefined') {
-          console.error('Panzoom library not loaded.');
-          return;
-        }
-
-        const panzoom = Panzoom(container, {
+    // Pan and zoom with panzoom.js (tiny lib)
+    (function(){
+      let script = document.createElement('script');
+      script.src = 'https://unpkg.com/@panzoom/panzoom@9.4.0/dist/panzoom.min.js';
+      script.onload = () => {
+        resetGrid();
+        const panzoom = Panzoom(viewport, {
+          contain: 'outside',
+          startScale: 1,
           maxScale: 5,
           minScale: 0.2,
-          contain: 'outside'
         });
-
-        const viewport = document.getElementById('viewport');
         viewport.addEventListener('wheel', panzoom.zoomWithWheel);
-
-        const centerX = (containerWidth / 2) * -1 + window.innerWidth / 2;
-        const centerY = (containerHeight / 2) * -1 + window.innerHeight / 2;
-        panzoom.pan(centerX, centerY);
-        panzoom.zoom(1.2);
-      }
-
-      // Delay panzoom init until script is loaded
-      if (document.readyState === 'complete') {
-        initializePanzoom();
-      } else {
-        window.addEventListener('load', initializePanzoom);
-      }
-    });
+        panzoom.zoom(1.2, { animate: false });
+        panzoom.pan(0, 0, { animate: false });
+      };
+      document.head.appendChild(script);
+    })();
   </script>
 </body>
 </html>
