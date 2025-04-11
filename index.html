@@ -40,35 +40,48 @@
   </div>
 
   <script>
-    // Dimensione della griglia e delle immagini
+    // Definisci un array di immagini dalla cartella 'imgs'
+    const imagesList = [
+      'imgs/img1.png', 'imgs/img2.png', 'imgs/img3.png', 'imgs/img4.png', 'imgs/img5.png', 
+      'imgs/img6.png', 'imgs/img7.png', 'imgs/img8.png', 'imgs/img9.png', 'imgs/img10.png'
+    ];
+
     const gridSize = 5000;  // dimensione totale della griglia (5000x5000 px)
-    const numImages = 50;   // numero di immagini
+    const numImages = imagesList.length;   // numero di immagini
     const minZoom = 0.5;    // zoom minimo
     const maxZoom = 2;      // zoom massimo
     let currentZoom = 1;    // zoom iniziale
 
     const gridElement = document.getElementById('grid');
 
-    // Funzione per caricare dinamicamente le immagini
+    // Funzione per caricare le immagini in modo casuale
     function loadImages() {
-      for (let i = 0; i < numImages; i++) {
-        const img = document.createElement('img');
-        img.classList.add('image');
-        
-        // Posizionamento casuale delle immagini in griglia
-        const imgWidth = Math.random() * 200 + 100;  // larghezza casuale
-        const imgHeight = Math.random() * 200 + 100; // altezza casuale
-        const xPos = Math.random() * (gridSize - imgWidth);
-        const yPos = Math.random() * (gridSize - imgHeight);
+      const usedImages = new Set(); // Per evitare la ripetizione delle immagini
 
-        img.src = `imgs/img${i + 1}.png`; // Percorso immagine dalla cartella 'imgs'
-        img.style.width = `${imgWidth}px`;
-        img.style.height = `${imgHeight}px`;
-        img.style.position = 'absolute';
-        img.style.left = `${xPos}px`;
-        img.style.top = `${yPos}px`;
+      while (usedImages.size < numImages) {
+        // Seleziona una immagine casuale
+        const imgIndex = Math.floor(Math.random() * numImages);
+        if (!usedImages.has(imgIndex)) {
+          usedImages.add(imgIndex);
 
-        gridElement.appendChild(img);
+          const img = document.createElement('img');
+          img.classList.add('image');
+
+          // Posizionamento casuale delle immagini
+          const imgWidth = Math.random() * 200 + 100;  // larghezza casuale
+          const imgHeight = Math.random() * 200 + 100; // altezza casuale
+          const xPos = Math.random() * (gridSize - imgWidth);
+          const yPos = Math.random() * (gridSize - imgHeight);
+
+          img.src = imagesList[imgIndex]; // Percorso immagine dalla cartella 'imgs'
+          img.style.width = `${imgWidth}px`;
+          img.style.height = `${imgHeight}px`;
+          img.style.position = 'absolute';
+          img.style.left = `${xPos}px`;
+          img.style.top = `${yPos}px`;
+
+          gridElement.appendChild(img);
+        }
       }
     }
 
@@ -105,7 +118,7 @@
     gridElement.addEventListener('wheel', (e) => {
       e.preventDefault();
       const zoomDirection = e.deltaY < 0 ? 1 : -1;
-      const newZoom = currentZoom + zoomDirection * 0.1;
+      const newZoom = currentZoom + zoomDirection * 0.05; // Zoom più lento
       currentZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
 
       // Applica lo zoom
@@ -114,7 +127,6 @@
 
     // Inizializza la mappa
     loadImages();
-
   </script>
 </body>
 </html>
