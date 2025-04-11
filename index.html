@@ -107,9 +107,8 @@
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
-  // Abilita pan anche su touch con un solo dito
+  // Attiva pan su un solo dito (mobile) o sempre su mouse
   if (e.pointerType === 'touch' && e.isPrimary === false) return;
-  if (e.pointerType === 'touch' && e.touches && e.touches.length > 1) return;
 
   isPanning = true;
   startX = e.clientX - originX;
@@ -137,6 +136,7 @@ let lastTouchCenter = null;
 wrapper.addEventListener('touchmove', (e) => {
   if (e.touches.length === 2) {
     e.preventDefault();
+    isPanning = false;
     const rect = wrapper.getBoundingClientRect();
     const [t1, t2] = e.touches;
 
@@ -165,9 +165,11 @@ wrapper.addEventListener('touchmove', (e) => {
   }
 }, { passive: false });
 
-wrapper.addEventListener('touchend', () => {
-  lastTouchDist = null;
-  lastTouchCenter = null;
+wrapper.addEventListener('touchend', (e) => {
+  if (e.touches.length < 2) {
+    lastTouchDist = null;
+    lastTouchCenter = null;
+  }
 });
 
     updateTransform();
