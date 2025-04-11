@@ -23,7 +23,7 @@
     #grid {
       position: absolute;
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       will-change: transform;
     }
 
@@ -44,7 +44,7 @@
   <script>
     // Elenco delle immagini presenti nella cartella 'imgs'
     const imagesList = [
-      'imgs/Unknown.jpeg', 'imgs/images.jpeg', 'imgs/Unknown-1.jpeg', 'images-1.jpeg', 'imgs/img5.jpg',
+      'imgs/img1.jpg', 'imgs/img2.jpg', 'imgs/img3.jpg', 'imgs/img4.jpg', 'imgs/img5.jpg',
       'imgs/img6.jpg', 'imgs/img7.jpg', 'imgs/img8.jpg', 'imgs/img9.jpg', 'imgs/img10.jpg'
     ];
 
@@ -63,7 +63,10 @@
     function loadImages() {
       const usedImages = new Set();
 
-      // Posiziona le immagini a caso sulla griglia
+      // Posiziona le immagini a caso sulla griglia, senza sovrapposizioni
+      const imgWidth = 300; // larghezza delle immagini fissa
+      const imgHeight = 300; // altezza delle immagini fissa
+
       for (let i = 0; i < 50; i++) {
         const imgIndex = Math.floor(Math.random() * imagesList.length);
         if (!usedImages.has(imgIndex)) {
@@ -72,11 +75,8 @@
           const img = document.createElement('img');
           img.classList.add('image');
 
-          // Imposta le dimensioni casuali delle immagini
-          const imgWidth = Math.random() * 200 + 100; // larghezza casuale
-          const imgHeight = Math.random() * 200 + 100; // altezza casuale
-          const xPos = Math.random() * (gridSize - imgWidth);
-          const yPos = Math.random() * (gridSize - imgHeight);
+          const xPos = (i % 10) * imgWidth; // Posizione orizzontale
+          const yPos = Math.floor(i / 10) * imgHeight; // Posizione verticale
 
           img.src = imagesList[imgIndex]; // Percorso immagine dalla cartella 'imgs'
           img.style.width = `${imgWidth}px`;
@@ -123,10 +123,15 @@
     viewportElement.addEventListener('wheel', (e) => {
       e.preventDefault();
       const zoomDirection = e.deltaY < 0 ? 1 : -1;
-      const newZoom = currentZoom + zoomDirection * 0.1; // Zoom meno rapido
+      const newZoom = currentZoom + zoomDirection * 0.05; // Zoom meno rapido
       currentZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
 
-      // Applica lo zoom alla griglia
+      // Calcola il punto di zoom in base alla posizione del cursore
+      const scaleFactor = currentZoom / (currentZoom - zoomDirection * 0.05);
+      const offsetX = (e.pageX - viewportElement.offsetLeft) * (1 - scaleFactor);
+      const offsetY = (e.pageY - viewportElement.offsetTop) * (1 - scaleFactor);
+
+      gridElement.style.transformOrigin = `${offsetX}px ${offsetY}px`;
       gridElement.style.transform = `scale(${currentZoom})`;
     });
 
