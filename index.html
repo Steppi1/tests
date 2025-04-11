@@ -4,88 +4,130 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mappa Interattiva a Mosaico</title>
-  <!-- Inclusione dello stile Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    /* Rimuove margini/padding e assicura la copertura totale della viewport */
+    /* Rimuove margini e padding e assicura che la pagina occupi l'intera viewport */
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
-    }
-    /* Contenitore della mappa che occupa l'intera finestra */
-    #map {
+      overflow: hidden;
       width: 100%;
       height: 100%;
+    }
+    /* Contenitore principale che copre l'intera finestra */
+    #container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      background: #222; /* sfondo scuro per far risaltare le immagini */
+    }
+    /* La griglia "mosaic" è posizionata al centro del contenitore */
+    #mosaic {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: grid;
+      /* Imposta 8 colonne, ognuna di 150px (cambia questo valore se vuoi celle di dimensioni diverse) */
+      grid-template-columns: repeat(8, 150px);
+      gap: 0; /* nessun gap, per avere le immagini attaccate */
+      cursor: grab;
+    }
+    /* Le immagini sono forzate a occupare 150px per 150px, mantenendo le proporzioni con object-fit */
+    #mosaic img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <!-- Contenitore della mappa -->
-  <div id="map"></div>
+  <div id="container">
+    <div id="mosaic">
+      <!-- Le immagini verranno aggiunte dinamicamente -->
+    </div>
+  </div>
   
-  <!-- Inclusione della libreria Leaflet -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Inclusione della libreria Panzoom via CDN -->
+  <script src="https://unpkg.com/@panzoom/panzoom@9.4.0/dist/panzoom.min.js"></script>
   <script>
-    // Parametri della griglia:
-    const tileSize = 150; // dimensione in pixel di ogni immagine
-    // Array con il percorso delle immagini (modifica in base ai nomi dei file nella cartella imgs)
-    const images = [
-      "imgs/img1.jpg",
-      "imgs/img2.jpg",
-      "imgs/img3.jpg",
-      "imgs/img4.jpg",
-      "imgs/img5.jpg",
-      "imgs/img6.jpg",
-      "imgs/img7.jpg",
-      "imgs/img8.jpg",
-      "imgs/img9.jpg"
-      // Aggiungi ulteriori immagini se presenti
+    /***********************
+     * Generazione del mosaico
+     ***********************/
+    // Array dei nomi dei file delle immagini (assicurati di rispettare gli spazi nel nome!)
+    const baseImages = [
+      "imgs/img 1.png",
+      "imgs/img 2.png",
+      "imgs/img 3.png",
+      "imgs/img 4.png",
+      "imgs/img 5.png",
+      "imgs/img 6.png",
+      "imgs/img 7.png",
+      "imgs/img 8.png"
     ];
     
-    // Definisci il numero di colonne: per esempio 3 colonne
-    const columns = 3;
-    // Calcola il numero di righe in base al numero totale di immagini
-    const rows = Math.ceil(images.length / columns);
+    // Numero di volte in cui ripetere l'array base per formare il mosaico (modifica questo valore per avere più o meno righe)
+    const repeats = 4;
     
-    // Dimensioni totali della mappa (in pixel)
-    const mosaicWidth = columns * tileSize;
-    const mosaicHeight = rows * tileSize;
-    
-    // Inizializza la mappa con CRS.Simple per usare coordinate in pixel
-    const map = L.map('map', {
-      crs: L.CRS.Simple,
-      minZoom: -1,       // zoom minimo (puoi regolare)
-      maxZoom: 4,        // zoom massimo
-      zoomControl: true  // attiva i controlli di zoom (pulsanti + e -)
-    });
-    
-    // Definisci i limiti della mappa (l'intera griglia)
-    const bounds = [[0, 0], [mosaicHeight, mosaicWidth]];
-    
-    // Centra la mappa sul centro del mosaico
-    const center = [mosaicHeight / 2, mosaicWidth / 2];
-    map.setView(center, 0);
-    
-    // Imposta i limiti della mappa per impedire di spostarsi troppo fuori dalla griglia
-    map.setMaxBounds(bounds);
-    
-    // Per ogni immagine, calcola la sua posizione nella griglia e aggiungi un overlay
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < columns; c++) {
-        const index = r * columns + c;
-        if (index >= images.length) break;
-        
-        // Calcola i confini del "tile" corrente:
-        // Coordinate superiori sinistre: [r * tileSize, c * tileSize]
-        // Coordinate inferiori destre: [(r+1) * tileSize, (c+1) * tileSize]
-        const tileBounds = [
-          [r * tileSize, c * tileSize],
-          [(r + 1) * tileSize, (c + 1) * tileSize]
-        ];
-        L.imageOverlay(images[index], tileBounds).addTo(map);
+    const mosaic = document.getElementById('mosaic');
+    for (let r = 0; r < repeats; r++) {
+      for (let i = 0; i < baseImages.length; i++) {
+        const img = document.createElement('img');
+        img.src = baseImages[i];
+        img.alt = "Immagine " + (i + 1);
+        mosaic.appendChild(img);
       }
     }
+    
+    /***********************
+     * Inizializzazione di Panzoom
+     ***********************/
+    // Inizializza Panzoom sul contenitore del mosaico
+    const panzoomInstance = Panzoom(mosaic, {
+      maxScale: 4,
+      minScale: 1,
+      // Disabilitiamo la containment automatica per gestire manualmente i "muri"
+      contain: false
+    });
+    
+    // Abilita lo zoom mediante la rotella del mouse sull'intero contenitore
+    document.getElementById('container').addEventListener('wheel', panzoomInstance.zoomWithWheel);
+    
+    // Imposta il pan (centro) e applica uno zoom iniziale (qui 1.5×)
+    panzoomInstance.pan(0, 0, { animate: false });
+    panzoomInstance.zoom(1.5, { animate: false });
+    
+    /***********************
+     * Definizione dei "muri invisibili"
+     ***********************/
+    // Dimensione di ciascuna cella nel mosaico (in px)
+    const cellSize = 150;
+    // Numero fisso di colonne (corrisponde al valore in grid-template-columns)
+    const columns = 8;
+    // Il numero di righe è dato dal numero di ripetizioni
+    const rows = repeats;
+    
+    // Dimensioni totali del mosaico
+    const mosaicWidth = columns * cellSize;  // ad es. 8 * 150 = 1200px
+    const mosaicHeight = rows * cellSize;    // ad es. 4 * 150 = 600px
+    
+    // Margine extra oltre la zona delle immagini (puoi modificarlo per aumentare/diminuire l'area navigabile)
+    const margin = 300;
+    
+    // Calcola i limiti (massimi spostamenti in x e y) a partire dal centro
+    const maxPanX = mosaicWidth / 2 + margin;
+    const maxPanY = mosaicHeight / 2 + margin;
+    
+    // Al termine di un'azione di pan (al rilascio del mouse/tocco) controlla che la traslazione non superi i limiti
+    mosaic.addEventListener('panzoomend', () => {
+      const pan = panzoomInstance.getPan();
+      // Limita l'offset in x e y fra -maxPan e +maxPan
+      let newX = Math.max(-maxPanX, Math.min(maxPanX, pan.x));
+      let newY = Math.max(-maxPanY, Math.min(maxPanY, pan.y));
+      if (newX !== pan.x || newY !== pan.y) {
+        panzoomInstance.pan(newX, newY, { animate: false });
+      }
+    });
   </script>
 </body>
 </html>
