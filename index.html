@@ -1,101 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Masonry Zoom</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masonry Map Navigation</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    html, body {
+    html, body, #map {
       margin: 0;
       padding: 0;
-      overflow: hidden;
       height: 100%;
+      width: 100%;
       background: #000;
     }
-    #wrapper {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
+    .leaflet-tile {
+      image-rendering: pixelated;
     }
-    #panzoom {
-      display: grid;
-      grid-auto-flow: dense;
-      gap: 0;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-    .tile {
-      width: 150px;
-      height: 150px;
-      box-sizing: border-box;
-      padding: 0;
-    }
-    .tile img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+    .custom-tile {
+      width: 256px;
+      height: 256px;
+      background-size: cover;
+      background-position: center;
     }
   </style>
 </head>
 <body>
-  <div id="wrapper">
-    <div id="panzoom"></div>
-  </div>
-
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const panzoomEl = document.getElementById('panzoom');
+    const map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -4,
+      maxZoom: 4,
+      zoomSnap: 0.25,
+      zoomDelta: 0.25,
+      wheelPxPerZoomLevel: 60,
+      zoomControl: false,
+    });
+
+    const center = [0, 0];
+    map.setView(center, 0.5);
+
+    const tileSize = 256;
+    const gridSize = 20; // controls spread
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
-    const gridSize = 30;
-    const usedCoords = new Set();
 
-    function coordKey(x, y) {
-      return `${x},${y}`;
+    function randomImage() {
+      return images[Math.floor(Math.random() * images.length)];
     }
 
-    function randomInt(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    function placeImages(count = 400) {
-      for (let i = 0; i < count; i++) {
-        let x, y;
-        do {
-          x = randomInt(-gridSize, gridSize);
-          y = randomInt(-gridSize, gridSize);
-        } while (usedCoords.has(coordKey(x, y)));
-
-        usedCoords.add(coordKey(x, y));
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        tile.style.gridColumn = x + gridSize + 1;
-        tile.style.gridRow = y + gridSize + 1;
-
-        const img = document.createElement('img');
-        img.src = images[randomInt(0, images.length - 1)];
-        tile.appendChild(img);
-        panzoomEl.appendChild(tile);
+    for (let x = -gridSize; x <= gridSize; x++) {
+      for (let y = -gridSize; y <= gridSize; y++) {
+        const topLeft = [x * tileSize, y * tileSize];
+        const bounds = [
+          [topLeft[1], topLeft[0]],
+          [topLeft[1] + tileSize, topLeft[0] + tileSize]
+        ];
+        const url = randomImage();
+        L.imageOverlay(url, bounds).addTo(map);
       }
     }
 
-    placeImages();
-
-    // Load Panzoom and activate
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/@panzoom/panzoom@9.4.0/dist/panzoom.min.js';
-    script.onload = () => {
-      const panzoom = Panzoom(panzoomEl, {
-        contain: 'outside',
-        startScale: 1.2,
-        minScale: 0.2,
-        maxScale: 5,
-        step: 0.1
-      });
-      document.getElementById('wrapper').addEventListener('wheel', panzoom.zoomWithWheel);
-    };
-    document.head.appendChild(script);
+    // Centered on reload
+    map.setView(center, 0.5);
   </script>
 </body>
 </html>
