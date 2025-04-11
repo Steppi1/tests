@@ -181,4 +181,84 @@
       /***** PAN con mouse e touch *****/
       let isPanning = false;
       let panStart = { x: 0, y: 0 };
-      let startTranslation = { x: 0, y: 0
+      let startTranslation = { x: 0, y: 0 };
+      
+      function onDragStart(clientX, clientY) {
+        isPanning = true;
+        panStart = { x: clientX, y: clientY };
+        startTranslation = { ...translation };
+        viewport.style.cursor = "grabbing";
+        grid.style.transition = "none";
+      }
+      function onDragMove(clientX, clientY) {
+        if (!isPanning) return;
+        const dx = clientX - panStart.x;
+        const dy = clientY - panStart.y;
+        translation.x = startTranslation.x + dx;
+        translation.y = startTranslation.y + dy;
+        updateTransform();
+      }
+      function onDragEnd() {
+        if (!isPanning) return;
+        isPanning = false;
+        viewport.style.cursor = "grab";
+        // Se l'intero mosaic è fuori dal viewport (spazio nero totale), anima il ritorno al centro
+        const vpRect = viewport.getBoundingClientRect();
+        const gridRect = grid.getBoundingClientRect();
+        const completelyOff = (gridRect.right < vpRect.left || gridRect.left > vpRect.right ||
+                                 gridRect.bottom < vpRect.top || gridRect.top > vpRect.bottom);
+        if (completelyOff) {
+          grid.style.transition = "transform 0.5s ease-out";
+          centerGrid(mosaicWidth, mosaicHeight);
+          setTimeout(() => { grid.style.transition = ""; }, 600);
+        }
+      }
+      
+      // Mouse events
+      viewport.addEventListener("mousedown", (e) => {
+        onDragStart(e.clientX, e.clientY);
+      });
+      window.addEventListener("mousemove", (e) => {
+        onDragMove(e.clientX, e.clientY);
+      });
+      window.addEventListener("mouseup", onDragEnd);
+      
+      // Touch events
+      viewport.addEventListener("touchstart", (e) => {
+        if (e.touches.length === 1) {
+          onDragStart(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, {passive: false});
+      viewport.addEventListener("touchmove", (e) => {
+        if (!isPanning || e.touches.length !== 1) return;
+        onDragMove(e.touches[0].clientX, e.touches[0].clientY);
+        e.preventDefault();
+      }, {passive: false});
+      viewport.addEventListener("touchend", onDragEnd);
+      
+      /***** ZOOM via wheel (behave come in Figma) *****/
+      viewport.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const rect = viewport.getBoundingClientRect();
+        // Posizione del puntatore nel viewport
+        const pointer = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+        const oldZoom = zoomLevel;
+        // Fattore zoom: piccole variazioni per uno zoom "normale"
+        const zoomFactor = e.deltaY < 0 ? 1.05 : 0.95;
+        let newZoom = oldZoom * zoomFactor;
+        newZoom = Math.min(Math.max(newZoom, minZoom), maxZoom);
+        
+        // Calcola la nuova translation in modo che il punto sotto il cursore resti fisso.
+        translation.x = pointer.x - (pointer.x - translation.x) * (newZoom / oldZoom);
+        translation.y = pointer.y - (pointer.y - translation.y) * (newZoom / oldZoom);
+        
+        zoomLevel = newZoom;
+        updateTransform();
+      }, {passive: false});
+    }
+  </script>
+</body>
+</html>
