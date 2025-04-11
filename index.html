@@ -67,7 +67,7 @@
     const totalImages = 400;
     const numColumns = Math.floor(Math.sqrt(totalImages));
 
-    // Crea colonne
+    // Crea colonne masonry
     const columns = Array.from({ length: numColumns }, () => {
       const col = document.createElement('div');
       col.className = 'column';
@@ -90,7 +90,7 @@
       columns[i % numColumns].appendChild(tile);
     }
 
-    // Zoom + Pan
+    // Pan e Zoom
     let scale = 1;
     let originX = 0;
     let originY = 0;
@@ -103,10 +103,13 @@
       panzoomEl.style.transformOrigin = "0 0";
     }
 
-    // Centra il contenuto all'avvio
+    // Zoom iniziale più alto su desktop
     window.addEventListener('load', () => {
-      originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
-      originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
+      const isDesktop = window.innerWidth >= 768;
+      scale = isDesktop ? 2.5 : 1;
+
+      originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth * scale / 2);
+      originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight * scale / 2);
       updateTransform();
     });
 
@@ -126,7 +129,7 @@
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'touch' && e.isPrimary === false) return;
+      if (e.pointerType === 'touch' && !e.isPrimary) return;
       isPanning = true;
       startX = e.clientX - originX;
       startY = e.clientY - originY;
