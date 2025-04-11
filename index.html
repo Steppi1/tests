@@ -96,7 +96,6 @@
       const rect = wrapper.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-      const prevScale = scale;
 
       const delta = -e.deltaY * 0.001;
       const newScale = Math.min(Math.max(0.1, scale * (1 + delta)), 5);
@@ -108,15 +107,12 @@
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
-  // Permetti pan sempre con un dito, anche su touch
-  if (e.pointerType === 'touch' && e.isPrimary === false) return;
-
-  isPanning = true;
-  startX = e.clientX - originX;
-  startY = e.clientY - originY;
-  wrapper.style.cursor = 'grabbing';
-  wrapper.setPointerCapture(e.pointerId);
-});
+      if (e.pointerType === 'touch' && e.isPrimary === false) return;
+      isPanning = true;
+      startX = e.clientX - originX;
+      startY = e.clientY - originY;
+      wrapper.style.cursor = 'grabbing';
+      wrapper.setPointerCapture(e.pointerId);
     });
 
     wrapper.addEventListener('pointermove', (e) => {
@@ -131,23 +127,23 @@
       wrapper.style.cursor = 'grab';
     });
 
-    // Touch pinch-to-zoom pulito
+    // Touch pinch-to-zoom corretto
     let lastTouchDist = null;
     let lastTouchCenter = null;
 
     wrapper.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
-
         const rect = wrapper.getBoundingClientRect();
         const [t1, t2] = e.touches;
+
         const dx = t1.clientX - t2.clientX;
         const dy = t1.clientY - t2.clientY;
         const dist = Math.hypot(dx, dy);
         const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
         const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
 
-        if (lastTouchDist && lastTouchCenter) {
+        if (lastTouchDist !== null && lastTouchCenter) {
           const scaleFactor = dist / lastTouchDist;
           const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
 
