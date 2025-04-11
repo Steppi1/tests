@@ -40,10 +40,10 @@
   </div>
 
   <script>
-    // Definisci un array di immagini dalla cartella 'imgs'
+    // Carica le immagini dalla cartella 'imgs'
     const imagesList = [
-      'imgs/img1.png', 'imgs/img2.png', 'imgs/img3.png', 'imgs/img4.png', 'imgs/img5.png', 
-      'imgs/img6.png', 'imgs/img7.png', 'imgs/img8.png', 'imgs/img9.png', 'imgs/img10.png'
+      'imgs/img1.jpg', 'imgs/img2.jpg', 'imgs/img3.jpg', 'imgs/img4.jpg', 'imgs/img5.jpg',
+      'imgs/img6.jpg', 'imgs/img7.jpg', 'imgs/img8.jpg', 'imgs/img9.jpg', 'imgs/img10.jpg'
     ];
 
     const gridSize = 5000;  // dimensione totale della griglia (5000x5000 px)
@@ -54,7 +54,7 @@
 
     const gridElement = document.getElementById('grid');
 
-    // Funzione per caricare le immagini in modo casuale
+    // Funzione per caricare le immagini nella griglia
     function loadImages() {
       const usedImages = new Set(); // Per evitare la ripetizione delle immagini
 
