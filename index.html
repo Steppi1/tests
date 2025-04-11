@@ -108,10 +108,8 @@
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
-  // Previene pan durante pinch
   if (e.pointerType === 'touch' && e.isPrimary === false) return;
   if (e.pointerType === 'touch' && e.width > 0 && e.height > 0 && e.pressure === 0) return;
-  if (e.pointerType === 'touch' && e.width > 0 && e.height > 0 && e.pressure > 0 && navigator.maxTouchPoints > 1) return;
 
   isPanning = true;
   startX = e.clientX - originX;
