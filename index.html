@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Masonry Map Navigation</title>
   <style>
     html, body {
@@ -13,8 +13,6 @@
       width: 100%;
       background: #000;
       user-select: none;
-      -webkit-user-select: none;
-      -ms-user-select: none;
       touch-action: none;
     }
     #wrapper {
@@ -30,11 +28,11 @@
       left: 0;
       user-select: none;
       pointer-events: auto;
-      width: max-content;
-      height: max-content;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 300px);
+      gap: 10px;
     }
     .tile {
-      position: absolute;
       width: 300px;
       user-select: none;
       pointer-events: none;
@@ -42,8 +40,8 @@
     .tile img {
       width: 100%;
       height: auto;
-      object-fit: cover;
       display: block;
+      object-fit: cover;
       user-select: none;
       pointer-events: none;
     }
@@ -65,27 +63,16 @@
       return images[Math.floor(Math.random() * images.length)];
     }
 
-    const tileWidth = 300;
-    const margin = 10;
-    const spacing = tileWidth + margin; // spazio tra le immagini
-    const tilesPerSide = 2 * gridSize + 1;
+    const totalTiles = (2 * gridSize + 1) ** 2;
+    for (let i = 0; i < totalTiles; i++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
 
-    for (let row = 0; row < tilesPerSide; row++) {
-      for (let col = 0; col < tilesPerSide; col++) {
-        const x = col - gridSize;
-        const y = row - gridSize;
+      const img = document.createElement('img');
+      img.src = randomImage();
 
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-
-        tile.style.left = `${x * (tileWidth + margin)}px`;
-        tile.style.top = `${y * (tileWidth + margin)}px`;
-
-        const img = document.createElement('img');
-        img.src = randomImage();
-        tile.appendChild(img);
-        panzoomEl.appendChild(tile);
-      }
+      tile.appendChild(img);
+      panzoomEl.appendChild(tile);
     }
 
     let scale = 1;
@@ -116,7 +103,7 @@
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'touch' && e.isPrimary === false) return;
+      if (e.pointerType === 'touch' && !e.isPrimary) return;
       isPanning = true;
       startX = e.clientX - originX;
       startY = e.clientY - originY;
@@ -152,7 +139,7 @@
         const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
         const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
 
-        if (lastTouchDist !== null && lastTouchCenter) {
+        if (lastTouchDist && lastTouchCenter) {
           const scaleFactor = dist / lastTouchDist;
           const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
 
