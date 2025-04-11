@@ -32,34 +32,34 @@
       grid-auto-flow: dense;
       user-select: none;
       pointer-events: auto;
+      visibility: hidden;
     }
     .tile {
-  user-select: none;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+      user-select: none;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .tile img {
-  display: block;
-  max-width: 100%;
-  max-height: 100%;
-  height: auto;
-  width: auto;
-  user-select: none;
-  pointer-events: none;
-}
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      height: auto;
+      width: auto;
+      user-select: none;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <div id="wrapper">
-    <div id="panzoom" style="visibility:hidden;"></div>
+    <div id="panzoom"></div>
   </div>
 
   <script>
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
-
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
     const gridSize = 20;
 
@@ -68,27 +68,25 @@
     }
 
     for (let x = -gridSize; x <= gridSize; x++) {
-  for (let y = -gridSize; y <= gridSize; y++) {
-    const tile = document.createElement('div');
-    tile.className = 'tile';
-    tile.style.gridColumn = x + gridSize + 1;
-    tile.style.gridRow = y + gridSize + 1;
+      for (let y = -gridSize; y <= gridSize; y++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.style.gridColumn = x + gridSize + 1;
+        tile.style.gridRow = y + gridSize + 1;
 
-    const img = document.createElement('img');
-    img.src = randomImage();
+        const img = document.createElement('img');
+        img.src = randomImage();
 
-    img.onload = () => {
-  const aspectRatio = img.naturalWidth / img.naturalHeight;
-  tile.style.width = `${256 * aspectRatio}px`;
-  tile.style.height = `${256}px`;
-  updateTransform();
-      panzoomEl.style.visibility = 'visible';
-};
+        img.onload = () => {
+          const aspectRatio = img.naturalWidth / img.naturalHeight;
+          tile.style.width = `${256 * aspectRatio}px`;
+          tile.style.height = `256px`;
+          updateTransform();
+        };
 
-    tile.appendChild(img);
-    panzoomEl.appendChild(tile);
-  }
-}
+        tile.appendChild(img);
+        panzoomEl.appendChild(tile);
+      }
     }
 
     let scale = 1;
@@ -115,18 +113,16 @@
       originX -= (mouseX - originX) * (newScale / scale - 1);
       originY -= (mouseY - originY) * (newScale / scale - 1);
       scale = newScale;
-  updateTransform();
-  }, { passive: false });
+      updateTransform();
+    }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
-  // Attiva pan su un solo dito (mobile) o sempre su mouse
-  if (e.pointerType === 'touch' && e.isPrimary === false) return;
-
-  isPanning = true;
-  startX = e.clientX - originX;
-  startY = e.clientY - originY;
-  wrapper.style.cursor = 'grabbing';
-  wrapper.setPointerCapture(e.pointerId);
+      if (e.pointerType === 'touch' && e.isPrimary === false) return;
+      isPanning = true;
+      startX = e.clientX - originX;
+      startY = e.clientY - originY;
+      wrapper.style.cursor = 'grabbing';
+      wrapper.setPointerCapture(e.pointerId);
     });
 
     wrapper.addEventListener('pointermove', (e) => {
@@ -141,54 +137,54 @@
       wrapper.style.cursor = 'grab';
     });
 
-    // Touch pinch-to-zoom corretto
-let lastTouchDist = null;
-let lastTouchCenter = null;
+    let lastTouchDist = null;
+    let lastTouchCenter = null;
 
-wrapper.addEventListener('touchmove', (e) => {
-  if (e.touches.length === 2) {
-    e.preventDefault();
-    isPanning = false;
-    const rect = wrapper.getBoundingClientRect();
-    const [t1, t2] = e.touches;
+    wrapper.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        isPanning = false;
+        const rect = wrapper.getBoundingClientRect();
+        const [t1, t2] = e.touches;
 
-    const dx = t1.clientX - t2.clientX;
-    const dy = t1.clientY - t2.clientY;
-    const dist = Math.hypot(dx, dy);
-    const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
-    const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
+        const dx = t1.clientX - t2.clientX;
+        const dy = t1.clientY - t2.clientY;
+        const dist = Math.hypot(dx, dy);
+        const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
+        const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
 
-    if (lastTouchDist !== null && lastTouchCenter) {
-      const scaleFactor = dist / lastTouchDist;
-      const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
+        if (lastTouchDist !== null && lastTouchCenter) {
+          const scaleFactor = dist / lastTouchDist;
+          const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
 
-      originX += centerX - lastTouchCenter.x;
-      originY += centerY - lastTouchCenter.y;
+          originX += centerX - lastTouchCenter.x;
+          originY += centerY - lastTouchCenter.y;
 
-      originX -= (centerX - originX) * (newScale / scale - 1);
-      originY -= (centerY - originY) * (newScale / scale - 1);
+          originX -= (centerX - originX) * (newScale / scale - 1);
+          originY -= (centerY - originY) * (newScale / scale - 1);
 
-      scale = newScale;
-      updateTransform();
-    }
+          scale = newScale;
+          updateTransform();
+        }
 
-    lastTouchDist = dist;
-    lastTouchCenter = { x: centerX, y: centerY };
-  }
-}, { passive: false });
+        lastTouchDist = dist;
+        lastTouchCenter = { x: centerX, y: centerY };
+      }
+    }, { passive: false });
 
-wrapper.addEventListener('touchend', (e) => {
-  if (e.touches.length < 2) {
-    lastTouchDist = null;
-    lastTouchCenter = null;
-  }
-});
+    wrapper.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        lastTouchDist = null;
+        lastTouchCenter = null;
+      }
+    });
 
     window.onload = () => {
-    originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
-    originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
-    updateTransform();
-  };
-</script>
+      originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
+      originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
+      panzoomEl.style.visibility = 'visible';
+      updateTransform();
+    };
+  </script>
 </body>
 </html>
