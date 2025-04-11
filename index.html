@@ -19,13 +19,12 @@
       overflow: hidden;
       touch-action: none;
       cursor: grab;
+      position: relative;
     }
     #panzoom {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(1);
-      transform-origin: 0 0;
+      top: 0;
+      left: 0;
       display: grid;
       grid-auto-flow: dense;
     }
@@ -78,6 +77,12 @@
     let startX = 0;
     let startY = 0;
 
+    // Centra la vista all'avvio
+    const initialOffsetX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
+    const initialOffsetY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
+    originX = initialOffsetX;
+    originY = initialOffsetY;
+
     function updateTransform() {
       panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
     }
@@ -86,8 +91,10 @@
       e.preventDefault();
       const delta = -e.deltaY * 0.001;
       const rect = wrapper.getBoundingClientRect();
-      const offsetX = e.clientX - rect.left - originX;
-      const offsetY = e.clientY - rect.top - originY;
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const offsetX = mouseX - originX;
+      const offsetY = mouseY - originY;
 
       const newScale = Math.min(Math.max(0.1, scale * (1 + delta)), 5);
       originX -= offsetX * (newScale / scale - 1);
