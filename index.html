@@ -31,8 +31,7 @@
       display: grid;
       grid-auto-flow: dense;
       user-select: none;
-      -webkit-user-drag: none;
-      pointer-events: none;
+      pointer-events: auto;
     }
     .tile {
       width: 256px;
@@ -46,7 +45,6 @@
       object-fit: cover;
       display: block;
       user-select: none;
-      -webkit-user-drag: none;
       pointer-events: none;
     }
   </style>
@@ -110,6 +108,7 @@
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch' && e.isPrimary === false) return;
       isPanning = true;
       startX = e.clientX - originX;
       startY = e.clientY - originY;
@@ -129,8 +128,9 @@
       wrapper.style.cursor = 'grab';
     });
 
-    // TOUCH ZOOM FIX
+    // Touch zoom
     let lastDist = null;
+    let lastCenter = null;
     wrapper.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
@@ -139,26 +139,27 @@
         const dy = t1.clientY - t2.clientY;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        const midX = (t1.clientX + t2.clientX) / 2;
-        const midY = (t1.clientY + t2.clientY) / 2;
+        const centerX = (t1.clientX + t2.clientX) / 2;
+        const centerY = (t1.clientY + t2.clientY) / 2;
 
-        if (lastDist) {
-          const delta = dist - lastDist;
-          const pinchScale = 1 + delta * 0.005;
+        if (lastDist && lastCenter) {
+          const pinchScale = dist / lastDist;
           const newScale = Math.min(Math.max(0.1, scale * pinchScale), 5);
 
-          originX -= (midX - wrapper.offsetLeft - originX) * (newScale / scale - 1);
-          originY -= (midY - wrapper.offsetTop - originY) * (newScale / scale - 1);
+          originX -= (centerX - originX) * (newScale / scale - 1);
+          originY -= (centerY - originY) * (newScale / scale - 1);
 
           scale = newScale;
           updateTransform();
         }
         lastDist = dist;
+        lastCenter = { x: centerX, y: centerY };
       }
     }, { passive: false });
 
     wrapper.addEventListener('touchend', () => {
       lastDist = null;
+      lastCenter = null;
     });
 
     updateTransform();
