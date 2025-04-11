@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Griglia con Zoom e Navigazione Infinita</title>
+  <title>Griglia di Immagini con Zoom e Navigazione</title>
   <style>
     body, html {
       margin: 0;
@@ -22,15 +22,19 @@
 
     #grid {
       position: absolute;
-      display: flex;
-      flex-wrap: nowrap;
       will-change: transform;
     }
 
     .image {
-      object-fit: cover;
       position: absolute;
+      object-fit: cover;
       pointer-events: none;
+      transition: transform 0.2s ease-out;
+    }
+
+    #grid-wrapper {
+      display: flex;
+      flex-wrap: nowrap;
     }
   </style>
 </head>
@@ -41,54 +45,53 @@
   </div>
 
   <script>
-    // Funzione per caricare tutte le immagini dalla cartella 'imgs' usando una lista definita manualmente
+    // Funzione per caricare tutte le immagini dalla cartella 'imgs' su GitHub Pages
     function loadImages() {
       const gridElement = document.getElementById('grid');
+      
+      // Lista fittizia per testare (aggiungi le tue immagini qui)
       const imageList = [
-        'img1.jpg', 'img2.jpg', 'img3.jpg', 'img4.jpg', 'img5.jpg'
-      ]; // Sostituisci con il nome delle immagini effettive nel tuo repository
+        'img1.jpg', 'img2.jpg', 'img3.jpg', 'img4.jpg', 'img5.jpg', // metti qui i nomi reali delle tue immagini
+      ];
 
-      const imgWidth = 300;  // larghezza fissa
-      const imgHeight = 300; // altezza fissa
+      const imgWidth = 200;  // Larghezza media
+      const imgHeight = 200; // Altezza media
 
-      // Aggiungi un numero di immagini casuale, e posizionale in modo adiacente
-      for (let i = 0; i < imageList.length; i++) {
+      // Genera e posiziona immagini
+      imageList.forEach((imageName, index) => {
         const img = document.createElement('img');
         img.classList.add('image');
-        
-        // Carica una delle immagini dalla lista
-        img.src = `imgs/${imageList[i]}`; // Immagini caricate dalla cartella imgs
-        
-        const randomWidth = Math.floor(Math.random() * (imgWidth * 1.5)) + imgWidth;  // Larghezza variabile
-        const randomHeight = Math.floor(Math.random() * (imgHeight * 1.5)) + imgHeight; // Altezza variabile
+        img.src = `imgs/${imageName}`; // Le immagini sono caricate dalla cartella imgs
+
+        // Generazione dimensioni casuali
+        const randomWidth = Math.floor(Math.random() * (imgWidth * 1.5)) + imgWidth;
+        const randomHeight = Math.floor(Math.random() * (imgHeight * 1.5)) + imgHeight;
         
         img.style.width = `${randomWidth}px`;
         img.style.height = `${randomHeight}px`;
 
-        // Posiziona le immagini in modo casuale
-        img.style.left = `${(i % 10) * randomWidth}px`;
-        img.style.top = `${Math.floor(i / 10) * randomHeight}px`;
+        // Posizionamento casuale ma senza sovrapposizione
+        const leftPosition = Math.random() * window.innerWidth;
+        const topPosition = Math.random() * window.innerHeight;
+
+        img.style.left = `${leftPosition}px`;
+        img.style.top = `${topPosition}px`;
 
         gridElement.appendChild(img);
-      }
+      });
     }
 
-    // Parametri per la griglia
-    const minZoom = 0.5;  // Zoom minimo
-    const maxZoom = 3;    // Zoom massimo
-    let currentZoom = 1;  // Zoom iniziale
+    // Parametri per la mappa e zoom
+    const minZoom = 0.5;
+    const maxZoom = 3;
+    let currentZoom = 1;
     let isMouseDown = false;
     let startX, startY, scrollLeft, scrollTop;
 
     const gridElement = document.getElementById('grid');
     const viewportElement = document.getElementById('viewport');
 
-    // Funzione per fare in modo che la griglia si ripeta quando esci dai bordi
-    function repeatGrid() {
-      gridElement.style.transform = `scale(${currentZoom})`;
-    }
-
-    // Gestione dello spostamento della mappa
+    // Funzione per gestire il movimento della griglia
     function handleMouseMove(e) {
       if (!isMouseDown) return;
 
@@ -102,7 +105,7 @@
       gridElement.scrollTop = scrollTop - walkY;
     }
 
-    // Attiva lo spostamento quando il mouse è premuto
+    // Attivazione dello spostamento quando il mouse è premuto
     viewportElement.addEventListener('mousedown', (e) => {
       isMouseDown = true;
       startX = e.pageX - gridElement.offsetLeft;
@@ -112,7 +115,7 @@
       document.body.style.cursor = 'grabbing';
     });
 
-    // Disattiva lo spostamento quando il mouse è rilasciato
+    // Disattivazione dello spostamento quando il mouse è rilasciato
     document.addEventListener('mouseup', () => {
       isMouseDown = false;
       document.body.style.cursor = 'grab';
@@ -134,11 +137,34 @@
       gridElement.style.transform = `scale(${currentZoom})`;
     });
 
-    // Inizializza la mappa e carica le immagini
-    loadImages();
+    // Funzione per far ripetere la griglia come stile Pac-Man
+    function repeatGrid() {
+      gridElement.style.transform = `scale(${currentZoom})`;
 
-    // Chiamata iniziale per caricare la mappa
-    window.onload = repeatGrid;
+      const width = gridElement.offsetWidth;
+      const height = gridElement.offsetHeight;
+
+      if (gridElement.scrollLeft > width) {
+        gridElement.scrollLeft = 0;
+      }
+      if (gridElement.scrollTop > height) {
+        gridElement.scrollTop = 0;
+      }
+      if (gridElement.scrollLeft < 0) {
+        gridElement.scrollLeft = width;
+      }
+      if (gridElement.scrollTop < 0) {
+        gridElement.scrollTop = height;
+      }
+    }
+
+    // Chiamata iniziale
+    window.onload = function() {
+      loadImages();
+    };
+
+    // Funzione di ripetizione continua del blocco in stile pacman
+    setInterval(repeatGrid, 50);
   </script>
 
 </body>
