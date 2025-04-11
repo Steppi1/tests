@@ -16,7 +16,7 @@
       height: 100%;
     }
     .image-marker {
-      pointer-events: none; /* niente click per ora */
+      pointer-events: none;
       width: 100%;
       height: 100%;
     }
@@ -39,9 +39,9 @@
     });
 
     // Dimensione totale della "mappa"
-    const mapSize = 10000; // 10000x10000 px
-    const tileSize = 300;  // dimensione "immagine"
-    map.setView([Math.random() * mapSize, Math.random() * mapSize], 0);
+    const mapSize = 5000; // Ridotto per testare se la mappa è visibile
+    const tileSize = 300;  // Dimensione "immagine"
+    map.setView([mapSize / 2, mapSize / 2], 0); // Posizione iniziale al centro della mappa
 
     // Definisce i limiti della mappa (loop orizzontale finto)
     const bounds = [[0, 0], [mapSize, mapSize]];
@@ -49,7 +49,7 @@
 
     const numImages = 50;
     const imagesPerRow = 10;
-    const spacing = tileSize; // tutte attaccate
+    const spacing = tileSize;
 
     // Crea una funzione per generare colori casuali
     function getRandomColor() {
