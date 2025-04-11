@@ -90,8 +90,8 @@
     }
 
     let scale = 1;
-    let originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
-    let originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
+    let originX = 0;
+    let originY = 0;
     let isPanning = false;
     let startX = 0;
     let startY = 0;
@@ -113,7 +113,11 @@
       originX -= (mouseX - originX) * (newScale / scale - 1);
       originY -= (mouseY - originY) * (newScale / scale - 1);
       scale = newScale;
-      updateTransform();
+      window.onload = () => {
+  originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
+  originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
+  updateTransform();
+};
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
