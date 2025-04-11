@@ -8,22 +8,25 @@
   <style>
     html, body {
       margin: 0;
+      padding: 0;
       height: 100%;
-      overflow: hidden;
     }
     #map {
       width: 100%;
       height: 100%;
     }
     .tile {
+      width: 200px;
+      height: 200px;
+      border: 2px solid white;
+      box-sizing: border-box;
+      font-size: 20px;
+      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
-      color: white;
-      border: 2px solid white;
-      box-sizing: border-box;
       font-family: sans-serif;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -37,40 +40,34 @@
       minZoom: -3,
       maxZoom: 3,
       zoomControl: true,
-      attributionControl: false,
-      worldCopyJump: true
+      attributionControl: false
     });
 
-    const cols = 10;
-    const rows = 10;
-    const baseSize = 200;
-    const totalWidth = cols * baseSize;
-    const totalHeight = rows * baseSize;
+    const cols = 5;
+    const rows = 5;
+    const tileSize = 200;
+    const width = cols * tileSize;
+    const height = rows * tileSize;
 
-    map.setView([totalHeight / 2, totalWidth / 2], 0);
-    map.setMaxBounds([[0, 0], [totalHeight, totalWidth]]);
+    map.setView([height / 2, width / 2], 0);
+    map.setMaxBounds([[0, 0], [height, width]]);
 
-    const colors = ['#FF4136', '#2ECC40', '#0074D9', '#FF851B', '#B10DC9', '#FFDC00', '#001f3f', '#39CCCC', '#85144b', '#AAAAAA'];
+    const colors = ['red', 'green', 'blue', 'purple', 'orange'];
 
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const w = baseSize + (c % 3) * 40;
-        const h = baseSize + (r % 2) * 30;
-        const x = c * baseSize;
-        const y = r * baseSize;
-        const color = colors[(r * cols + c) % colors.length];
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * tileSize;
+        const y = row * tileSize;
+        const color = colors[(row + col) % colors.length];
 
-        const divIcon = L.divIcon({
+        const icon = L.divIcon({
           className: '',
-          iconSize: [w, h],
           iconAnchor: [0, 0],
-          html: `<div class="tile" style="width:${w}px; height:${h}px; background:${color}">${r},${c}</div>`
+          iconSize: [tileSize, tileSize],
+          html: `<div class="tile" style="background:${color}">${row},${col}</div>`
         });
 
-        L.marker([y, x], {
-          icon: divIcon,
-          interactive: false
-        }).addTo(map);
+        L.marker([y, x], { icon, interactive: false }).addTo(map);
       }
     }
   </script>
