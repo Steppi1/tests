@@ -128,36 +128,43 @@
       wrapper.style.cursor = 'grab';
     });
 
-    // Touch pinch zoom (semplice e pulito)
-    let lastTouchDistance = null;
+    // Touch pinch zoom REFACTOR
+    let lastTouches = null;
     wrapper.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
         const [t1, t2] = e.touches;
         const dx = t1.clientX - t2.clientX;
         const dy = t1.clientY - t2.clientY;
-        const distance = Math.hypot(dx, dy);
-        const midX = (t1.clientX + t2.clientX) / 2;
-        const midY = (t1.clientY + t2.clientY) / 2;
-        const rect = wrapper.getBoundingClientRect();
-        const centerX = midX - rect.left;
-        const centerY = midY - rect.top;
+        const dist = Math.hypot(dx, dy);
 
-        if (lastTouchDistance) {
-          const scaleFactor = distance / lastTouchDistance;
-          const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
+        const rect = wrapper.getBoundingClientRect();
+        const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
+        const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
+
+        if (lastTouches) {
+          const [lt1, lt2] = lastTouches;
+          const ldx = lt1.clientX - lt2.clientX;
+          const ldy = lt1.clientY - lt2.clientY;
+          const lastDist = Math.hypot(ldx, ldy);
+
+          const newScale = Math.min(Math.max(0.1, scale * (dist / lastDist)), 5);
 
           originX -= (centerX - originX) * (newScale / scale - 1);
           originY -= (centerY - originY) * (newScale / scale - 1);
           scale = newScale;
           updateTransform();
         }
-        lastTouchDistance = distance;
+
+        lastTouches = [
+          { clientX: t1.clientX, clientY: t1.clientY },
+          { clientX: t2.clientX, clientY: t2.clientY }
+        ];
       }
     }, { passive: false });
 
     wrapper.addEventListener('touchend', () => {
-      lastTouchDistance = null;
+      lastTouches = null;
     });
 
     updateTransform();
