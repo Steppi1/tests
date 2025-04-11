@@ -42,11 +42,31 @@
   </div>
 
   <script>
-    // Elenco delle immagini presenti nella cartella 'imgs'
-    const imagesList = [
-      'imgs/img1.jpg', 'imgs/img2.jpg', 'imgs/img3.jpg', 'imgs/img4.jpg', 'imgs/img5.jpg',
-      'imgs/img6.jpg', 'imgs/img7.jpg', 'imgs/img8.jpg', 'imgs/img9.jpg', 'imgs/img10.jpg'
-    ];
+    // Funzione per caricare le immagini dalla cartella imgs
+    function loadImages() {
+      const gridElement = document.getElementById('grid');
+      const images = [];
+      const imgWidth = 300; // larghezza delle immagini fissa
+      const imgHeight = 300; // altezza delle immagini fissa
+
+      // Se vuoi aggiungere immagini dinamicamente, puoi farlo in questo modo:
+      for (let i = 0; i < 50; i++) {
+        const img = document.createElement('img');
+        img.classList.add('image');
+
+        // Carica una delle immagini dalla cartella 'imgs'
+        img.src = `imgs/img${(i % 5) + 1}.jpg`; // esempio con 5 immagini nella cartella imgs
+
+        img.style.width = `${imgWidth}px`;
+        img.style.height = `${imgHeight}px`;
+
+        // Posiziona le immagini in modo da essere attaccate
+        img.style.left = `${(i % 10) * imgWidth}px`;
+        img.style.top = `${Math.floor(i / 10) * imgHeight}px`;
+
+        gridElement.appendChild(img);
+      }
+    }
 
     // Parametri per la griglia
     const gridSize = 5000; // Dimensione della griglia (5000x5000 px)
@@ -59,34 +79,9 @@
     const gridElement = document.getElementById('grid');
     const viewportElement = document.getElementById('viewport');
 
-    // Funzione per generare immagini casuali sulla griglia
-    function loadImages() {
-      const usedImages = new Set();
-
-      // Posiziona le immagini a caso sulla griglia, senza sovrapposizioni
-      const imgWidth = 300; // larghezza delle immagini fissa
-      const imgHeight = 300; // altezza delle immagini fissa
-
-      for (let i = 0; i < 50; i++) {
-        const imgIndex = Math.floor(Math.random() * imagesList.length);
-        if (!usedImages.has(imgIndex)) {
-          usedImages.add(imgIndex);
-
-          const img = document.createElement('img');
-          img.classList.add('image');
-
-          const xPos = (i % 10) * imgWidth; // Posizione orizzontale
-          const yPos = Math.floor(i / 10) * imgHeight; // Posizione verticale
-
-          img.src = imagesList[imgIndex]; // Percorso immagine dalla cartella 'imgs'
-          img.style.width = `${imgWidth}px`;
-          img.style.height = `${imgHeight}px`;
-          img.style.left = `${xPos}px`;
-          img.style.top = `${yPos}px`;
-
-          gridElement.appendChild(img);
-        }
-      }
+    // Funzione per fare in modo che la griglia si ripeta quando esci dai bordi
+    function repeatGrid() {
+      gridElement.style.transform = `scale(${currentZoom})`;
     }
 
     // Gestione dello spostamento della mappa
@@ -137,11 +132,6 @@
 
     // Inizializza la mappa e carica le immagini
     loadImages();
-
-    // Funzione per fare in modo che la griglia si ripeta quando esci dai bordi
-    function repeatGrid() {
-      gridElement.style.transform = `scale(${currentZoom})`;
-    }
 
     // Chiamata iniziale per caricare la mappa
     window.onload = repeatGrid;
