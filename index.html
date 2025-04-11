@@ -28,6 +28,13 @@
       cursor: grab;
     }
     #panzoom {
+      width: 100vmax;
+      height: 100vmax;
+      max-width: none;
+      max-height: none;
+      column-count: 8;
+      column-gap: 0;
+
       max-width: 2048px;
       position: absolute;
       top: 0;
@@ -40,21 +47,22 @@
       visibility: hidden;
     }
     .tile {
-      user-select: none;
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  user-select: none;
+  pointer-events: none;
+  break-inside: avoid;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
     .tile img {
-      display: block;
-      max-width: 100%;
-      max-height: 100%;
-      height: auto;
-      width: auto;
-      user-select: none;
-      pointer-events: none;
-    }
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+}
   </style>
 </head>
 <body>
@@ -82,7 +90,7 @@
 
         img.onload = () => {
   const aspectRatio = img.naturalWidth / img.naturalHeight;
-  tile.style.width = `${256 * aspectRatio}px`;
+  tile.style.width = '100%';
   if (!panzoomEl.dataset.ready) {
     panzoomEl.dataset.ready = 'true';
     originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
