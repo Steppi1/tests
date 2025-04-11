@@ -78,10 +78,11 @@
     img.src = randomImage();
 
     img.onload = () => {
-      const aspectRatio = img.naturalWidth / img.naturalHeight;
-      tile.style.width = `${256 * aspectRatio}px`;
-      tile.style.height = `256px`;
-    };
+  const aspectRatio = img.naturalWidth / img.naturalHeight;
+  tile.style.width = `${256 * aspectRatio}px`;
+  tile.style.height = `${256}px`;
+  updateTransform();
+};
 
     tile.appendChild(img);
     panzoomEl.appendChild(tile);
@@ -113,12 +114,8 @@
       originX -= (mouseX - originX) * (newScale / scale - 1);
       originY -= (mouseY - originY) * (newScale / scale - 1);
       scale = newScale;
-      window.onload = () => {
-  originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
-  originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
   updateTransform();
-};
-    }, { passive: false });
+  }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
   // Attiva pan su un solo dito (mobile) o sempre su mouse
@@ -186,7 +183,11 @@ wrapper.addEventListener('touchend', (e) => {
   }
 });
 
+    window.onload = () => {
+    originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
+    originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
     updateTransform();
-  </script>
+  };
+</script>
 </body>
 </html>
