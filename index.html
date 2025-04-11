@@ -25,8 +25,11 @@
     const map = L.map('map', {
       crs: L.CRS.Simple,
       zoomControl: false,
-      scrollWheelZoom: true,
-      wheelPxPerZoomLevel: 25 // smooth zoom come Google Maps
+      scrollWheelZoom: 'center', // zoom centrato sul cursore, senza lag
+      inertia: true,
+      inertiaDeceleration: 5000, // più fluido
+      wheelDebounceTime: 0, // elimina ritardo zoom
+      wheelPxPerZoomLevel: 50 // reattività più naturale
     });
 
     const center = [0, 0];
