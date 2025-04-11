@@ -24,16 +24,9 @@
   <script>
     const map = L.map('map', {
       crs: L.CRS.Simple,
-      minZoom: -4,
-      maxZoom: 4,
-      zoomSnap: 0, // disabilitato per consentire fluidità assoluta
-      zoomDelta: 0.25, // step realistico per zoom
-      wheelPxPerZoomLevel: 60, // comportamento più simile a Google Maps
       zoomControl: false,
-      inertia: true,
-      inertiaDeceleration: 3000, // maggiore decelerazione = più fluido
-      scrollWheelZoom: true, // assicurato attivo
-      wheelDebounceTime: 10 // riduce lag tra rotelle
+      scrollWheelZoom: true,
+      wheelPxPerZoomLevel: 25 // smooth zoom come Google Maps
     });
 
     const center = [0, 0];
@@ -52,7 +45,7 @@
         [y * tileSize, x * tileSize],
         [(y + 1) * tileSize, (x + 1) * tileSize]
       ];
-      L.imageOverlay(imageUrl, bounds).addTo(map);
+      L.imageOverlay(imageUrl, bounds, { interactive: false }).addTo(map);
     }
 
     for (let x = -gridSize; x <= gridSize; x++) {
@@ -62,7 +55,8 @@
       }
     }
 
-    map.setView(center, 0.5);
+    map.setZoom(0.5);
+    map.setView(center);
   </script>
 </body>
 </html>
