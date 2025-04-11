@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Masonry Map Navigation</title>
+  <title>Masonry Layout Map</title>
   <style>
     html, body {
       margin: 0;
@@ -28,8 +28,13 @@
       left: 0;
       user-select: none;
       pointer-events: auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 300px);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .column {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
     }
     .tile {
@@ -57,24 +62,34 @@
     const panzoomEl = document.getElementById('panzoom');
 
     const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
-    const gridSize = 20;
+    const totalImages = 400;
+    const numColumns = Math.floor(Math.sqrt(totalImages)); // per blocco quadrato
+
+    // Crea colonne
+    const columns = Array.from({ length: numColumns }, () => {
+      const col = document.createElement('div');
+      col.className = 'column';
+      panzoomEl.appendChild(col);
+      return col;
+    });
 
     function randomImage() {
       return images[Math.floor(Math.random() * images.length)];
     }
 
-    const totalTiles = (2 * gridSize + 1) ** 2;
-    for (let i = 0; i < totalTiles; i++) {
+    for (let i = 0; i < totalImages; i++) {
+      const imgEl = document.createElement('img');
+      imgEl.src = randomImage();
+
       const tile = document.createElement('div');
       tile.className = 'tile';
+      tile.appendChild(imgEl);
 
-      const img = document.createElement('img');
-      img.src = randomImage();
-
-      tile.appendChild(img);
-      panzoomEl.appendChild(tile);
+      // distribuisci in modo round-robin
+      columns[i % numColumns].appendChild(tile);
     }
 
+    // Pan & zoom (immutato)
     let scale = 1;
     let originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
     let originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
