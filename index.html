@@ -13,6 +13,8 @@
       width: 100%;
       background: #000;
       user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
       touch-action: none;
     }
     #wrapper {
@@ -28,6 +30,9 @@
       left: 0;
       display: grid;
       grid-auto-flow: dense;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
     }
     .tile {
       width: 256px;
@@ -41,6 +46,7 @@
       object-fit: cover;
       display: block;
       user-select: none;
+      -webkit-user-drag: none;
       pointer-events: none;
     }
   </style>
@@ -76,17 +82,11 @@
     }
 
     let scale = 1;
-    let originX = 0;
-    let originY = 0;
+    let originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
+    let originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
     let isPanning = false;
     let startX = 0;
     let startY = 0;
-
-    // Centra la vista all'avvio
-    const initialOffsetX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth / 2);
-    const initialOffsetY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight / 2);
-    originX = initialOffsetX;
-    originY = initialOffsetY;
 
     function updateTransform() {
       panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
@@ -109,7 +109,6 @@
       updateTransform();
     }, { passive: false });
 
-    // Gestione pan con pointer e touch
     wrapper.addEventListener('pointerdown', (e) => {
       isPanning = true;
       startX = e.clientX - originX;
@@ -119,7 +118,7 @@
     });
 
     wrapper.addEventListener('pointermove', (e) => {
-      if (!isPanning || e.pointerType === 'touch' && e.touches?.length > 1) return;
+      if (!isPanning) return;
       originX = e.clientX - startX;
       originY = e.clientY - startY;
       updateTransform();
@@ -130,9 +129,8 @@
       wrapper.style.cursor = 'grab';
     });
 
-    // Touch pinch zoom per mobile corretto
-    let lastTouchMid = null;
-    let lastTouchDist = null;
+    // TOUCH ZOOM FIX
+    let lastDist = null;
     wrapper.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
@@ -140,27 +138,27 @@
         const dx = t1.clientX - t2.clientX;
         const dy = t1.clientY - t2.clientY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const rect = wrapper.getBoundingClientRect();
-        const midX = (t1.clientX + t2.clientX) / 2 - rect.left;
-        const midY = (t1.clientY + t2.clientY) / 2 - rect.top;
 
-        if (lastTouchDist !== null && lastTouchMid) {
-          const pinchScale = dist / lastTouchDist;
+        const midX = (t1.clientX + t2.clientX) / 2;
+        const midY = (t1.clientY + t2.clientY) / 2;
+
+        if (lastDist) {
+          const delta = dist - lastDist;
+          const pinchScale = 1 + delta * 0.005;
           const newScale = Math.min(Math.max(0.1, scale * pinchScale), 5);
-          originX -= (midX - originX) * (newScale / scale - 1);
-          originY -= (midY - originY) * (newScale / scale - 1);
+
+          originX -= (midX - wrapper.offsetLeft - originX) * (newScale / scale - 1);
+          originY -= (midY - wrapper.offsetTop - originY) * (newScale / scale - 1);
+
           scale = newScale;
           updateTransform();
         }
-
-        lastTouchDist = dist;
-        lastTouchMid = { x: midX, y: midY };
+        lastDist = dist;
       }
     }, { passive: false });
 
     wrapper.addEventListener('touchend', () => {
-      lastTouchDist = null;
-      lastTouchMid = null;
+      lastDist = null;
     });
 
     updateTransform();
