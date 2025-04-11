@@ -38,7 +38,7 @@
 
     // Dimensione totale della "mappa"
     const mapSize = 10000; // 10000x10000 px
-    const tileSize = 300;  // dimensione immagine
+    const tileSize = 300;  // dimensione "immagine"
     map.setView([Math.random() * mapSize, Math.random() * mapSize], 0);
 
     // Definisce i limiti della mappa (loop orizzontale finto)
@@ -49,7 +49,7 @@
     const imagesPerRow = 10;
     const spacing = tileSize; // tutte attaccate
 
-    // Carica immagini e le piazza in una griglia spostata random
+    // Carica "immagini" colorate e le piazza in una griglia spostata random
     for (let i = 0; i < numImages; i++) {
       const row = Math.floor(i / imagesPerRow);
       const col = i % imagesPerRow;
@@ -62,13 +62,17 @@
       x += Math.random() * mapSize / 2;
       y += Math.random() * mapSize / 2;
 
-      // Centra immagine rispetto al punto
+      // Centra "immagine" rispetto al punto
       const imageBounds = [
         [y, x],
         [y + tileSize, x + tileSize]
       ];
 
-      const imageUrl = `images/img${i + 1}.png`;
+      // Crea un colore random per ogni "immagine"
+      const color = `hsl(${Math.random() * 360}, 100%, 50%)`; // colore casuale
+
+      // Crea un quadrato colorato come immagine
+      const imageUrl = `https://via.placeholder.com/${tileSize}?text=${i + 1}&bg=${color.slice(4, -1)}`;
 
       L.imageOverlay(imageUrl, imageBounds, {
         className: 'image-marker'
