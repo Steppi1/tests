@@ -99,7 +99,7 @@
     });
 
     // Zoom e movimento
-    let scale = 2; // Zoom iniziale maggiore
+    let scale = 1.5; // Zoom iniziale meno esagerato
     let origin = { x: -300, y: -200 }; // posizione iniziale centrata
     let isDragging = false;
     let dragStart = { x: 0, y: 0 };
@@ -113,7 +113,7 @@
 
     document.getElementById('viewport').addEventListener('wheel', e => {
       e.preventDefault();
-      const zoomIntensity = 0.1;
+      const zoomIntensity = 0.05; // Ridotto l'intensità dello zoom
       const mouseX = e.clientX;
       const mouseY = e.clientY;
 
@@ -147,7 +147,7 @@
     });
 
     // 🔁 Griglia infinita (moltiplica le tiles virtualmente)
-    function replicateGrid(times = 3) {
+    function replicateGrid(times = 1) {
       const baseWidth = colPositions[cols - 1] + columnWidths[cols - 1];
       const baseHeight = rowPositions[rows - 1] + rowHeights[rows - 1];
 
@@ -173,7 +173,16 @@
       }
     }
 
-    replicateGrid(2); // crea duplicati attorno alla griglia principale
+    // Aggiungi ripetizione quando ci si avvicina ai bordi
+    const viewport = document.getElementById('viewport');
+    viewport.addEventListener('mousemove', () => {
+      const gridRect = grid.getBoundingClientRect();
+      const viewportRect = viewport.getBoundingClientRect();
+
+      if (gridRect.right - viewportRect.left < 300 || gridRect.bottom - viewportRect.top < 300) {
+        replicateGrid(1); // Aggiungi ripetizione se ci avviciniamo al bordo
+      }
+    });
   </script>
 </body>
 </html>
