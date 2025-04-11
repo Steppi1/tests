@@ -2,167 +2,97 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mosaico Interattivo da Zero</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mappa Immagini Puzzle</title>
   <style>
-    /* Pagina fullscreen, sfondo scuro, no scroll del browser */
     html, body {
-      margin: 0; 
-      padding: 0; 
-      width: 100vw; 
-      height: 100vh; 
-      background: #111; 
-      overflow: hidden; /* niente barre di scorrimento */
-    }
-
-    /*
-      Contenitore che "inquadra" il mosaico,
-      su cui facciamo pan & zoom con la libreria.
-    */
-    #container {
-      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
       height: 100%;
-      position: relative;
-      overflow: hidden; 
-      background-color: #111;
-    }
-
-    /*
-      Il mosaico in sé: un'area che potrà essere
-      più grande o più piccola del container,
-      e verrà spostata/zoomata. 
-
-      Usiamo "inline-grid" per:
-      - permettere a Panzoom di calcolare bene la larghezza
-      - evitare che #mosaic si estenda orizzontalmente al 100%,
-        ma piuttosto solo quanto serve alle colonne.
-
-      Impostiamo 4 colonne da 250px ciascuna, e righe automatiche:
-      => dimensione finale = dipende dal numero di immagini / righe.
-    */
-    #mosaic {
-      display: inline-grid;
-      grid-template-columns: repeat(4, 250px);  /* 4 colonne fisse */
-      grid-auto-rows: auto;                    /* altezza riga dipende dalle immagini */
-      gap: 8px;                                /* spazio tra celle */
-      background: #111;                        /* sfondo scuro */
-    }
-
-    /* Ogni img riempie la cella in larghezza,
-       mantenendo le proporzioni (height: auto).
-    */
-    #mosaic img {
       width: 100%;
-      height: auto;
-      display: block;       /* niente spazi bianchi indesiderati */
-      object-fit: cover;    /* se vuoi "coprire" la cella. Togli se non serve */
-      background: #222;     /* fallback scuro mentre carica */
+      background: #000;
+    }
+    #viewport {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    #container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: grid;
+      grid-auto-flow: dense;
+      grid-template-columns: repeat(auto-fill, 100px);
+      gap: 0;
+    }
+    #container img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      display: block;
+      border: 0.5px solid #000;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@9.4.0/dist/panzoom.min.js" defer></script>
 </head>
 <body>
-  <div id="container">
-    <div id="mosaic"></div>
+  <div id="viewport">
+    <div id="container"></div>
   </div>
-
-  <!-- Libreria Panzoom di anvaka (versione 3.2.3 via CDN) -->
-  <script src="https://cdn.jsdelivr.net/gh/anvaka/panzoom@3.2.3/dist/panzoom.min.js"></script>
-
   <script>
-    /***************************************************************
-     * 1) ELENCO FILE IMMAGINE
-     *    Non servono coordinate x,y: la griglia li dispone.
-     ***************************************************************/
-    const imagesList = [
-      "imgs/img 1.png",
-      "imgs/img 2.png",
-      "imgs/img 3.png",
-      "imgs/img 4.png",
-      "imgs/img5.jpg",
-      "imgs/img6.jpg",
-      "imgs/img7.png",
-      "imgs/img8.jpg",
-      "imgs/img9.jpg",
-      "imgs/img10.jpg",
-      "imgs/img11.jpg",
-      "imgs/img12.png",
-      // Aggiungi altre immagini...
-    ];
+    window.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('container');
+      const imageCount = 8;
+      const totalImages = 200;
 
-    const mosaic = document.getElementById("mosaic");
-    const loadPromises = [];
+      function getImageSrc(index) {
+        return `https://picsum.photos/seed/${index}/100/100`;
+      }
 
-    // Creiamo i <img> e li aggiungiamo a #mosaic
-    imagesList.forEach((src) => {
-      const img = document.createElement("img");
-      img.src = src;
-      mosaic.appendChild(img);
+      for (let i = 0; i < totalImages; i++) {
+        const imgNum = Math.floor(Math.random() * imageCount) + 1;
+        const img = document.createElement('img');
+        img.src = getImageSrc(imgNum);
+        container.appendChild(img);
+      }
 
-      // Ogni immagine risolve una Promise quando è caricata
-      const p = new Promise((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error("Immagine non caricata: " + src));
-      });
-      loadPromises.push(p);
+      const columns = Math.ceil(Math.sqrt(totalImages));
+      const rows = Math.ceil(totalImages / columns);
+      const containerWidth = columns * 100;
+      const containerHeight = rows * 100;
+      container.style.width = `${containerWidth}px`;
+      container.style.height = `${containerHeight}px`;
+
+      function initializePanzoom() {
+        if (typeof Panzoom === 'undefined') {
+          console.error('Panzoom library not loaded.');
+          return;
+        }
+
+        const panzoom = Panzoom(container, {
+          maxScale: 5,
+          minScale: 0.2,
+          contain: 'outside'
+        });
+
+        const viewport = document.getElementById('viewport');
+        viewport.addEventListener('wheel', panzoom.zoomWithWheel);
+
+        const centerX = (containerWidth / 2) * -1 + window.innerWidth / 2;
+        const centerY = (containerHeight / 2) * -1 + window.innerHeight / 2;
+        panzoom.pan(centerX, centerY);
+        panzoom.zoom(1.2);
+      }
+
+      // Delay panzoom init until script is loaded
+      if (document.readyState === 'complete') {
+        initializePanzoom();
+      } else {
+        window.addEventListener('load', initializePanzoom);
+      }
     });
-
-    /***************************************************************
-     * 2) ATTENDIAMO IL CARICAMENTO DI TUTTE LE IMMAGINI,
-     *    POI INIZIALIZZIAMO PANZOOM.
-     ***************************************************************/
-    Promise.all(loadPromises)
-      .then(() => {
-        // Tutte le immagini caricate: avvia Pan & Zoom
-        initPanzoom();
-      })
-      .catch((error) => {
-        console.warn(error);
-        // Anche se una fallisce, proviamo comunque a iniziare
-        initPanzoom();
-      });
-
-    function initPanzoom() {
-      // Applica panzoom al mosaico
-      const pz = panzoom(mosaic, {
-        bounds: true,       // limiti laterali
-        boundsPadding: 0.2, // un po' di tolleranza
-        minZoom: 0.5,
-        maxZoom: 3,
-      });
-
-      // Ruba la rotella del mouse per zoom (invece dello scroll di pagina)
-      const container = document.getElementById("container");
-      container.addEventListener("wheel", function(e) {
-        e.preventDefault();
-        pz.zoomWithWheel(e);
-      }, { passive: false });
-
-      // Centra e zooma inizialmente
-      centerAndZoom(pz);
-    }
-
-    function centerAndZoom(pz) {
-      const containerRect = document.getElementById("container").getBoundingClientRect();
-      const mosaicRect    = document.getElementById("mosaic").getBoundingClientRect();
-
-      // Troviamo il centro del mosaic e del container
-      const mosaicCenterX = mosaicRect.width  / 2;
-      const mosaicCenterY = mosaicRect.height / 2;
-      const containerCenterX = containerRect.width  / 2;
-      const containerCenterY = containerRect.height / 2;
-
-      // Zoom iniziale
-      const initialZoom = 1.2;
-
-      // 1) ZoomAbs (centro = centro del mosaic)
-      pz.zoomAbs(mosaicCenterX, mosaicCenterY, initialZoom);
-
-      // 2) Muoviamo in modo che i due centri coincidano
-      const finalX = containerCenterX - mosaicCenterX * initialZoom;
-      const finalY = containerCenterY - mosaicCenterY * initialZoom;
-      pz.moveTo(finalX, finalY);
-    }
   </script>
 </body>
 </html>
