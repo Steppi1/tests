@@ -105,6 +105,46 @@
       originY -= (mouseY - originY) * (newScale / scale - 1);
       scale = newScale;
       updateTransform();
+
+    // Touch pinch-to-zoom pulito
+    let lastTouchDist = null;
+    let lastTouchCenter = null;
+
+    wrapper.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+
+        const rect = wrapper.getBoundingClientRect();
+        const [t1, t2] = e.touches;
+        const dx = t1.clientX - t2.clientX;
+        const dy = t1.clientY - t2.clientY;
+        const dist = Math.hypot(dx, dy);
+        const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
+        const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
+
+        if (lastTouchDist && lastTouchCenter) {
+          const scaleFactor = dist / lastTouchDist;
+          const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
+
+          originX += centerX - lastTouchCenter.x;
+          originY += centerY - lastTouchCenter.y;
+
+          originX -= (centerX - originX) * (newScale / scale - 1);
+          originY -= (centerY - originY) * (newScale / scale - 1);
+
+          scale = newScale;
+          updateTransform();
+        }
+
+        lastTouchDist = dist;
+        lastTouchCenter = { x: centerX, y: centerY };
+      }
+    }, { passive: false });
+
+    wrapper.addEventListener('touchend', () => {
+      lastTouchDist = null;
+      lastTouchCenter = null;
+    });
     }, { passive: false });
 
     wrapper.addEventListener('pointerdown', (e) => {
