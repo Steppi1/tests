@@ -26,12 +26,8 @@
       cursor: grab;
     }
     #panzoom {
-      width: 1500px;
-      height: 1500px;
       display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      grid-template-rows: repeat(10, 1fr);
-      gap: 0;
+      gap: 10px;
       position: absolute;
       top: 0;
       left: 0;
@@ -40,40 +36,38 @@
       visibility: hidden;
     }
     .tile {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px;
-      box-sizing: border-box;
       background: transparent;
       width: 100%;
       height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .tile img {
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
       display: block;
-      background: transparent;
       pointer-events: none;
       user-select: none;
+      background: transparent;
     }
 
     @media (max-width: 768px) {
       #panzoom {
-        width: 2200px;
-        height: 2200px;
         grid-template-columns: repeat(10, 200px);
         grid-template-rows: repeat(10, 200px);
+        width: calc((200px + 10px) * 10 - 10px);
+        height: calc((200px + 10px) * 10 - 10px);
       }
     }
 
     @media (min-width: 769px) {
       #panzoom {
-        width: 4200px;
-        height: 4200px;
         grid-template-columns: repeat(10, 400px);
         grid-template-rows: repeat(10, 400px);
+        width: calc((400px + 10px) * 10 - 10px);
+        height: calc((400px + 10px) * 10 - 10px);
       }
     }
   </style>
@@ -93,7 +87,7 @@
       return images[Math.floor(Math.random() * images.length)];
     }
 
-    let scale = 0.5;
+    let scale = 1;
     let originX = 0;
     let originY = 0;
     let isPanning = false;
@@ -103,6 +97,13 @@
     function updateTransform() {
       panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
       panzoomEl.style.transformOrigin = "0 0";
+    }
+
+    function centerView() {
+      const rect = panzoomEl.getBoundingClientRect();
+      originX = (wrapper.clientWidth / 2) - (rect.width * scale / 2);
+      originY = (wrapper.clientHeight / 2) - (rect.height * scale / 2);
+      updateTransform();
     }
 
     for (let y = 0; y < gridCount; y++) {
@@ -116,11 +117,8 @@
         img.onload = () => {
           if (!panzoomEl.dataset.ready) {
             panzoomEl.dataset.ready = 'true';
-            const rect = panzoomEl.getBoundingClientRect();
-            originX = (wrapper.clientWidth / 2) - (rect.width * scale / 2);
-            originY = (wrapper.clientHeight / 2) - (rect.height * scale / 2);
             panzoomEl.style.visibility = 'visible';
-            updateTransform();
+            centerView();
           }
         };
 
@@ -129,6 +127,7 @@
       }
     }
 
+    // Zoom scroll
     wrapper.addEventListener('wheel', (e) => {
       e.preventDefault();
       const rect = wrapper.getBoundingClientRect();
@@ -144,6 +143,7 @@
       updateTransform();
     }, { passive: false });
 
+    // Pan
     wrapper.addEventListener('pointerdown', (e) => {
       if (e.pointerType === 'touch' && e.isPrimary === false) return;
       isPanning = true;
@@ -165,6 +165,7 @@
       wrapper.style.cursor = 'grab';
     });
 
+    // Touch zoom
     let lastTouchDist = null;
     let lastTouchCenter = null;
 
@@ -205,6 +206,11 @@
         lastTouchDist = null;
         lastTouchCenter = null;
       }
+    });
+
+    // Recenter on resize
+    window.addEventListener('resize', () => {
+      setTimeout(centerView, 100);
     });
   </script>
 </body>
