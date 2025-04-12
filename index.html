@@ -5,105 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Masonry Map Navigation</title>
   <style>
-
-
-
-
-
-    
-#sticky-bar {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #ffe100;
-  border-radius: 100px;
-  padding: 20px 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: monospace;
-  z-index: 9999;
-  box-shadow: 0 0 20px rgba(0,0,0,0.2);
-}
-
-#sticky-bar .icons {
-  display: flex;
-  gap: 40px;
-  align-items: center;
-}
-
-#sticky-bar a,
-#sticky-bar button {
-  all: unset;
-  cursor: pointer;
-  line-height: 1;
-}
-
-#sticky-bar img {
-  width: 32px;
-  height: 32px;
-  transition: transform 0.2s ease;
-}
-
-#sticky-bar img:hover {
-  transform: scale(1.2);
-}
-
-#sticky-bar .crediti {
-  margin-top: 10px;
-  font-size: 0.6rem;
-  color: #333;
-  text-align: center;
-  max-width: 100%;
-  line-height: 1.2;
-}
-
-/* ✅ Mobile visibile */
-@media (max-width: 768px) {
-  #sticky-bar {
-    transform: none;
-    left: 10px;
-    right: 10px;
-    width: calc(100% - 20px);
-    bottom: 10px;
-    padding: 15px 20px;
-    border-radius: 20px;
-  }
-
-  #sticky-bar .icons {
-    gap: 30px;
-  }
-
-  #sticky-bar img {
-    width: 28px;
-    height: 28px;
-  }
-
-  #sticky-bar .crediti {
-    display: none;
-  }
-}
-
-/* Modalità chiara: cambia solo il background */
-body.light-mode
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-    
     html, body {
       margin: 0;
       padding: 0;
@@ -115,7 +16,13 @@ body.light-mode
       -webkit-user-select: none;
       -ms-user-select: none;
       touch-action: none;
+      transition: background 0.3s ease;
     }
+
+    body.light-mode {
+      background-color: #ffffff;
+    }
+
     #wrapper {
       width: 100%;
       height: 100%;
@@ -123,6 +30,7 @@ body.light-mode
       position: relative;
       cursor: grab;
     }
+
     #panzoom {
       position: absolute;
       top: 0;
@@ -133,16 +41,19 @@ body.light-mode
       user-select: none;
       pointer-events: auto;
     }
+
     .column {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
+
     .tile {
       width: 300px;
       user-select: none;
       pointer-events: none;
     }
+
     .tile img {
       width: 100%;
       height: auto;
@@ -151,107 +62,136 @@ body.light-mode
       user-select: none;
       pointer-events: none;
     }
+
+    /* ───────── STICKY BAR ───────── */
+
+    #sticky-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffe100;
+      border-radius: 100px;
+      padding: 20px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: monospace;
+      z-index: 9999;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    #sticky-bar .icons {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+    }
+
+    #sticky-bar a,
+    #sticky-bar button {
+      all: unset;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    #sticky-bar img {
+      width: 32px;
+      height: 32px;
+      transition: transform 0.2s ease;
+    }
+
+    #sticky-bar img:hover {
+      transform: scale(1.2);
+    }
+
+    #sticky-bar .crediti {
+      margin-top: 10px;
+      font-size: 0.6rem;
+      color: #333;
+      text-align: center;
+      max-width: 100%;
+      line-height: 1.2;
+    }
+
+    /* Mobile layout */
+    @media (max-width: 768px) {
+      #sticky-bar {
+        transform: none;
+        left: 10px;
+        right: 10px;
+        width: calc(100% - 20px);
+        bottom: 10px;
+        padding: 15px 20px;
+        border-radius: 20px;
+      }
+
+      #sticky-bar .icons {
+        gap: 30px;
+      }
+
+      #sticky-bar img {
+        width: 28px;
+        height: 28px;
+      }
+
+      #sticky-bar .crediti {
+        display: none;
+      }
+    }
   </style>
 </head>
-
-
 
 <body>
   <div id="wrapper">
     <div id="panzoom"></div>
   </div>
 
+  <!-- 🔻 Sticky bar -->
+  <div id="sticky-bar">
+    <div class="icons">
+      <a href="mailto:me@girste.com" title="Scrivimi"><img src="mail-icon.svg" alt="Mail"></a>
+      <a href="tel:+393405445704" title="Chiama"><img src="tel-icon.svg" alt="Telefono"></a>
+      <button onclick="location.reload()" title="Ricarica"><img src="ric-icon.svg" alt="Ricarica"></button>
+      <button id="toggle-theme" title="Modalità chiara/scura"><img src="dark-icon.svg" alt="Contrasto"></button>
+      <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
+    </div>
+    <div class="crediti">
+      © Stefano Girard, 2025<br>
+      design by Creative Unit – this site does not save any data
+    </div>
+  </div>
+
+  <!-- 🔻 Script -->
   <script>
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
 
-    // 🔥 NUMERO TOTALE DI IMMAGINI NELLA CARTELLA "imgs/"
-    // ⚠️ ASSICURATI CHE IL NUMERO QUI CORRISPONDA A QUANTE .webp HAI
     const totalImages = 75;
+    const images = [
+      "imgs/img-1.webp", "imgs/img-2.webp", "imgs/img-3.webp", "imgs/img-4.webp",
+      "imgs/img-5.webp", "imgs/img-6.webp", "imgs/img-7.webp", "imgs/img-8.webp",
+      "imgs/img-9.webp", "imgs/img-10.webp", "imgs/img-11.webp", "imgs/img-12.webp",
+      "imgs/img-13.webp", "imgs/img-14.webp", "imgs/img-15.webp",
+      // "imgs/img-16.webp", // eliminata
+      "imgs/img-17.webp", "imgs/img-18.webp", "imgs/img-19.webp", "imgs/img-20.webp",
+      "imgs/img-21.webp", "imgs/img-22.webp", "imgs/img-23.webp", "imgs/img-24.webp",
+      "imgs/img-25.webp", "imgs/img-26.webp",
+      // "imgs/img-27.webp", // eliminata
+      "imgs/img-28.webp", "imgs/img-29.webp", "imgs/img-30.webp", "imgs/img-31.webp",
+      "imgs/img-32.webp", "imgs/img-33.webp", "imgs/img-34.webp", "imgs/img-35.webp",
+      "imgs/img-36.webp", "imgs/img-37.webp", "imgs/img-38.webp", "imgs/img-39.webp",
+      "imgs/img-40.webp", "imgs/img-41.webp", "imgs/img-42.webp", "imgs/img-43.webp",
+      "imgs/img-44.webp", "imgs/img-45.webp", "imgs/img-46.webp", "imgs/img-47.webp",
+      "imgs/img-48.webp", "imgs/img-49.webp", "imgs/img-50.webp", "imgs/img-51.webp",
+      "imgs/img-52.webp", "imgs/img-53.webp", "imgs/img-54.webp", "imgs/img-55.webp",
+      "imgs/img-56.webp", "imgs/img-57.webp", "imgs/img-58.webp", "imgs/img-59.webp",
+      "imgs/img-60.webp", "imgs/img-61.webp", "imgs/img-62.webp", "imgs/img-63.webp",
+      "imgs/img-64.webp", "imgs/img-65.webp", "imgs/img-66.webp", "imgs/img-67.webp",
+      "imgs/img-68.webp", "imgs/img-69.webp", "imgs/img-70.webp", "imgs/img-71.webp",
+      "imgs/img-72.webp", "imgs/img-73.webp", "imgs/img-74.webp", "imgs/img-75.webp",
+      "imgs/img-76.webp", "imgs/img-77.webp"
+    ];
 
-    // 🔁 CREA ARRAY DEI NOMI IMG: img-1.webp, img-2.webp, ...
-   const images = [
-  "imgs/img-1.webp",
-  "imgs/img-2.webp",
-  "imgs/img-3.webp",
-  "imgs/img-4.webp",
-  "imgs/img-5.webp",
-  "imgs/img-6.webp",
-  "imgs/img-7.webp",
-  "imgs/img-8.webp",
-  "imgs/img-9.webp",
-  "imgs/img-10.webp",
-  "imgs/img-11.webp",
-  "imgs/img-12.webp",
-  "imgs/img-13.webp",
-  "imgs/img-14.webp",
-  "imgs/img-15.webp",
-  // "imgs/img-16.webp", // 🔥 eliminata
-  "imgs/img-17.webp",
-  "imgs/img-18.webp",
-  "imgs/img-19.webp",
-  "imgs/img-20.webp",
-  "imgs/img-21.webp",
-  "imgs/img-22.webp",
-  "imgs/img-23.webp",
-  "imgs/img-24.webp",
-  "imgs/img-25.webp",
-  "imgs/img-26.webp",
-  // "imgs/img-27.webp", // 🔥 eliminata
-  "imgs/img-28.webp",
-  "imgs/img-29.webp",
-  "imgs/img-30.webp",
-  "imgs/img-31.webp",
-  "imgs/img-32.webp",
-  "imgs/img-33.webp",
-  "imgs/img-34.webp",
-  "imgs/img-35.webp",
-  "imgs/img-36.webp",
-  "imgs/img-37.webp",
-  "imgs/img-38.webp",
-  "imgs/img-39.webp",
-  "imgs/img-40.webp",
-  "imgs/img-41.webp",
-  "imgs/img-42.webp",
-  "imgs/img-43.webp",
-  "imgs/img-44.webp",
-  "imgs/img-45.webp",
-  "imgs/img-46.webp",
-  "imgs/img-47.webp",
-  "imgs/img-48.webp",
-  "imgs/img-49.webp",
-  "imgs/img-50.webp",
-  "imgs/img-51.webp",
-  "imgs/img-52.webp",
-  "imgs/img-53.webp",
-  "imgs/img-54.webp",
-  "imgs/img-55.webp",
-  "imgs/img-56.webp",
-  "imgs/img-57.webp",
-  "imgs/img-58.webp",
-  "imgs/img-59.webp",
-  "imgs/img-60.webp",
-  "imgs/img-61.webp",
-  "imgs/img-62.webp",
-  "imgs/img-63.webp",
-  "imgs/img-64.webp",
-  "imgs/img-65.webp",
-  "imgs/img-66.webp",
-  "imgs/img-67.webp",
-  "imgs/img-68.webp",
-  "imgs/img-69.webp",
-  "imgs/img-70.webp",
-  "imgs/img-71.webp",
-  "imgs/img-72.webp",
-  "imgs/img-73.webp",
-  "imgs/img-74.webp",
-  "imgs/img-75.webp",
-  "imgs/img-76.webp",
-  "imgs/img-77.webp"
-];
-
-
-    // 🔀 MESCOLA L’ORDINE DELLE IMMAGINI
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -260,10 +200,7 @@ body.light-mode
     }
     shuffle(images);
 
-    // 📐 NUMERO DI COLONNE IN BASE ALLE IMMAGINI TOTALI
     const numColumns = Math.floor(Math.sqrt(totalImages));
-
-    // 🧱 CREA COLONNE
     const columns = Array.from({ length: numColumns }, () => {
       const col = document.createElement('div');
       col.className = 'column';
@@ -271,7 +208,6 @@ body.light-mode
       return col;
     });
 
-    // 📦 INSERISCI IMMAGINI DISTRIBUITE NELLA COLONNA PIÙ BASSA
     for (let i = 0; i < totalImages; i++) {
       const imgEl = document.createElement('img');
       imgEl.src = images[i];
@@ -280,14 +216,12 @@ body.light-mode
       tile.className = 'tile';
       tile.appendChild(imgEl);
 
-      // ⚖️ TROVA LA COLONNA CON ALTEZZA MINORE PER EVITARE PILE TROPPO LUNGHE
       let shortestCol = columns.reduce((prev, curr) =>
         prev.offsetHeight < curr.offsetHeight ? prev : curr
       );
       shortestCol.appendChild(tile);
     }
 
-    // 🖱️ ZOOM E PAN
     let scale = 1;
     let originX = 0;
     let originY = 0;
@@ -300,20 +234,14 @@ body.light-mode
       panzoomEl.style.transformOrigin = "0 0";
     }
 
-    // 🔍 ZOOM INIZIALE
     window.addEventListener('load', () => {
       const isDesktop = window.innerWidth >= 768;
-
-      // 📏 IMPOSTA QUI LO ZOOM INIZIALE
-      // 👇 MODIFICA QUESTI VALORI SE VUOI PIÙ O MENO ZOOM IN PARTENZA
       scale = isDesktop ? 2 : 0.5;
-
       originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth * scale / 2);
       originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight * scale / 2);
       updateTransform();
     });
 
-    // 🧭 GESTIONE ZOOM CON SCROLL
     wrapper.addEventListener('wheel', (e) => {
       e.preventDefault();
       const rect = wrapper.getBoundingClientRect();
@@ -329,7 +257,6 @@ body.light-mode
       updateTransform();
     }, { passive: false });
 
-    // 🖱️ GESTIONE PAN
     wrapper.addEventListener('pointerdown', (e) => {
       if (e.pointerType === 'touch' && !e.isPrimary) return;
       isPanning = true;
@@ -351,7 +278,6 @@ body.light-mode
       wrapper.style.cursor = 'grab';
     });
 
-    // 🤏 PINCH TO ZOOM MOBILE
     let lastTouchDist = null;
     let lastTouchCenter = null;
 
@@ -396,43 +322,11 @@ body.light-mode
 
     updateTransform();
 
-
-
-
-const toggleThemeBtn = document.getElementById("toggle-theme");
-
-toggleThemeBtn.addEventListener("click", () => {
-  document.body.classList.toggle("light-mode");
-});
-
-
-    
-
-
-
-
+    // 🔁 Tema chiaro/scuro
+    const toggleThemeBtn = document.getElementById("toggle-theme");
+    toggleThemeBtn.addEventListener("click", () => {
+      document.body.classList.toggle("light-mode");
+    });
   </script>
-
-
-
-
-<div id="sticky-bar">
-  <div class="icons">
-    <a href="mailto:me@girste.com" title="Scrivimi"><img src="mail-icon.svg" alt="Mail"></a>
-    <a href="tel:+393405445704" title="Chiama"><img src="tel-icon.svg" alt="Telefono"></a>
-    <button onclick="location.reload()" title="Ricarica"><img src="ric-icon.svg" alt="Ricarica"></button>
-    <button id="toggle-theme" title="Modalità chiara/scura"><img src="dark-icon.svg" alt="Contrasto"></button>
-    <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
-  </div>
-  <div class="crediti">
-    © Stefano Girard, 2025<br>
-    design by Creative Unit – this site does not save any data
-  </div>
-</div>
-
-
-  
-
-
 </body>
 </html>
