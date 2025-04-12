@@ -30,7 +30,7 @@
 #sticky-bar .icons {
   display: flex;
   gap: 30px;
-  font-size: 2rem;
+  align-items: center;
 }
 
 #sticky-bar a,
@@ -38,25 +38,45 @@
   all: unset;
   cursor: pointer;
   line-height: 1;
-  transition: transform 0.2s;
 }
 
-#sticky-bar a:hover,
-#sticky-bar button:hover {
+#sticky-bar img {
+  width: 32px;
+  height: 32px;
+  transition: transform 0.2s ease;
+}
+
+#sticky-bar img:hover {
   transform: scale(1.2);
 }
 
 #sticky-bar .crediti {
   margin-top: 10px;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: #333;
   text-align: center;
   max-width: 100%;
 }
 
+/* Nasconde la barra su schermi piccoli */
+@media (max-width: 768px) {
+  #sticky-bar {
+    display: none;
+  }
+}
 
 
 
+
+
+
+
+
+
+
+
+
+    
 
 
     
@@ -357,9 +377,6 @@
 
 
 
-
-
-
 const toggleThemeBtn = document.getElementById("toggle-theme");
 let darkMode = true;
 
@@ -367,7 +384,6 @@ toggleThemeBtn.addEventListener("click", () => {
   darkMode = !darkMode;
   document.body.style.backgroundColor = darkMode ? "#000" : "#fff";
 });
-
 
 
     
@@ -380,21 +396,18 @@ toggleThemeBtn.addEventListener("click", () => {
 
 
 
-
-
 <div id="sticky-bar">
   <div class="icons">
-    <a href="mailto:me@girste.com" title="Scrivimi">📧</a>
-    <a href="tel:+0000000000" title="Chiama">📞</a>
-    <button onclick="location.reload()" title="Ricarica">🔄</button>
-    <button id="toggle-theme" title="Modalità chiara/scura">🌓</button>
-    <a href="/diario" title="Diario">📔</a>
+    <a href="mailto:me@girste.com" title="Scrivimi"><img src="mail-icon.svg" alt="Mail"></a>
+    <a href="tel:+0000000000" title="Chiama"><img src="tel-icon.svg" alt="Telefono"></a>
+    <button onclick="location.reload()" title="Ricarica"><img src="ric-icon.svg" alt="Ricarica"></button>
+    <button id="toggle-theme" title="Modalità chiara/scura"><img src="dark-icon.svg" alt="Contrasto"></button>
+    <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
   </div>
   <div class="crediti">
     © Stefano Girard, 2025 – design by Creative Unit – this site does not save any data
   </div>
 </div>
-
 
 
   
