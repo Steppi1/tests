@@ -106,11 +106,20 @@
       align-items: center;
     }
 
-    .icon-logo img {
-      width: 240px;           /* larghezza fissa visibile */
-      height: auto;
-      max-width: 100%;
-      display: block;
+    .icon-logo span {
+      font-family: sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: #000;
+      white-space: nowrap;
+    }
+
+    body.light-mode .icon-logo span {
+      color: #000;
+    }
+
+    body:not(.light-mode) .icon-logo span {
+      color: #000;
     }
 
     @media (max-width: 768px) {
@@ -127,8 +136,8 @@
         height: 26px;
       }
 
-      .icon-logo img {
-        width: 180px;
+      .icon-logo span {
+        font-size: 14px;
       }
     }
   </style>
@@ -148,7 +157,7 @@
       <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
     </div>
     <div class="icon-logo">
-      <img src="line-icon.svg" alt="Girste's logo">
+      <span>girste.com — cose sparse in ordine sparso</span>
     </div>
   </div>
 
