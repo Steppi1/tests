@@ -16,11 +16,9 @@
       touch-action: none;
       transition: background 0.3s ease;
     }
-
     body.light-mode {
       background-color: #fff;
     }
-
     #wrapper {
       width: 100%;
       height: 100%;
@@ -28,7 +26,6 @@
       position: relative;
       cursor: grab;
     }
-
     #panzoom {
       position: absolute;
       top: 0;
@@ -39,19 +36,16 @@
       user-select: none;
       pointer-events: auto;
     }
-
     .column {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-
     .tile {
       width: 300px;
       user-select: none;
       pointer-events: none;
     }
-
     .tile img {
       width: 100%;
       height: auto;
@@ -60,7 +54,7 @@
       user-select: none;
       pointer-events: none;
     }
-
+    /* Sticky Bar */
     #sticky-bar {
       position: fixed;
       bottom: 20px;
@@ -74,70 +68,61 @@
       align-items: center;
       z-index: 9999;
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      max-width: 92vw;
     }
-
     .icon-group {
       display: flex;
       gap: 32px;
       align-items: center;
       justify-content: center;
     }
-
-    #sticky-bar a,
-    #sticky-bar button {
-      all: unset;
-      cursor: pointer;
-    }
-
-    #sticky-bar img {
+    /* Applichiamo le dimensioni solo alle icone della group, non all'immagine sotto */
+    .icon-group img {
       width: 32px;
       height: 32px;
       transition: transform 0.2s ease;
     }
-
-    #sticky-bar img:hover {
+    .icon-group img:hover {
       transform: scale(1.2);
     }
-
+    /* L'immagine sotto (text-icon.svg) deve occupare tutta la larghezza del contenitore */
     .text-image {
       margin-top: 10px;
       width: 100%;
     }
-
     .text-image img {
       display: block;
       width: 100%;
       height: auto;
       max-width: 100%;
     }
-
+    /* Su desktop, rendiamo le icone un po' più piccole e la barra più compatta */
     @media (min-width: 769px) {
       #sticky-bar {
         padding: 10px 24px;
       }
-
       .text-image {
         margin-top: 8px;
       }
-
-      #sticky-bar img {
+      .icon-group img {
         width: 26px;
         height: 26px;
       }
     }
-
+    /* Su mobile */
     @media (max-width: 768px) {
       #sticky-bar {
         padding: 12px 22px;
       }
-
       .icon-group {
         gap: 24px;
       }
-
-      #sticky-bar img {
+      .icon-group img {
         width: 26px;
         height: 26px;
+      }
+      .text-image {
+        margin-top: 6px;
       }
     }
   </style>
@@ -157,7 +142,7 @@
       <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
     </div>
     <div class="text-image">
-      <img src="text-icon.svg" alt="Text icon">
+      <img src="text-icon.svg" alt="girste.com — cose sparse in ordine sparso">
     </div>
   </div>
 
@@ -249,7 +234,6 @@
 
     let lastTouchDist = null;
     let lastTouchCenter = null;
-
     wrapper.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
@@ -261,7 +245,6 @@
         const dist = Math.hypot(dx, dy);
         const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
         const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
-
         if (lastTouchDist !== null && lastTouchCenter) {
           const scaleFactor = dist / lastTouchDist;
           const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
@@ -272,7 +255,6 @@
           scale = newScale;
           updateTransform();
         }
-
         lastTouchDist = dist;
         lastTouchCenter = { x: centerX, y: centerY };
       }
