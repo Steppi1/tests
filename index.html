@@ -63,11 +63,14 @@
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
 
-    // Numero totale di immagini generate in webp
-    const totalImages = 75; // <-- cambia qui se ne hai di più
+    // 🔥 NUMERO TOTALE DI IMMAGINI NELLA CARTELLA "imgs/"
+    // ⚠️ ASSICURATI CHE IL NUMERO QUI CORRISPONDA A QUANTE .webp HAI
+    const totalImages = 75;
+
+    // 🔁 CREA ARRAY DEI NOMI IMG: img-1.webp, img-2.webp, ...
     const images = Array.from({ length: totalImages }, (_, i) => `imgs/img-${i + 1}.webp`);
 
-    // Shuffle per mescolare l’ordine
+    // 🔀 MESCOLA L’ORDINE DELLE IMMAGINI
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -76,9 +79,10 @@
     }
     shuffle(images);
 
+    // 📐 NUMERO DI COLONNE IN BASE ALLE IMMAGINI TOTALI
     const numColumns = Math.floor(Math.sqrt(totalImages));
 
-    // Crea colonne masonry
+    // 🧱 CREA COLONNE
     const columns = Array.from({ length: numColumns }, () => {
       const col = document.createElement('div');
       col.className = 'column';
@@ -86,7 +90,7 @@
       return col;
     });
 
-    // Inserisci immagini (non ripetute)
+    // 📦 INSERISCI IMMAGINI DISTRIBUITE NELLA COLONNA PIÙ BASSA
     for (let i = 0; i < totalImages; i++) {
       const imgEl = document.createElement('img');
       imgEl.src = images[i];
@@ -95,14 +99,14 @@
       tile.className = 'tile';
       tile.appendChild(imgEl);
 
-      // Trova la colonna con altezza minore
-let shortestCol = columns.reduce((prev, curr) =>
-  prev.offsetHeight < curr.offsetHeight ? prev : curr
-);
-shortestCol.appendChild(tile);
+      // ⚖️ TROVA LA COLONNA CON ALTEZZA MINORE PER EVITARE PILE TROPPO LUNGHE
+      let shortestCol = columns.reduce((prev, curr) =>
+        prev.offsetHeight < curr.offsetHeight ? prev : curr
+      );
+      shortestCol.appendChild(tile);
     }
 
-    // Pan e Zoom
+    // 🖱️ ZOOM E PAN
     let scale = 1;
     let originX = 0;
     let originY = 0;
@@ -115,9 +119,12 @@ shortestCol.appendChild(tile);
       panzoomEl.style.transformOrigin = "0 0";
     }
 
-    // Zoom iniziale più alto su desktop
+    // 🔍 ZOOM INIZIALE
     window.addEventListener('load', () => {
       const isDesktop = window.innerWidth >= 768;
+
+      // 📏 IMPOSTA QUI LO ZOOM INIZIALE
+      // 👇 MODIFICA QUESTI VALORI SE VUOI PIÙ O MENO ZOOM IN PARTENZA
       scale = isDesktop ? 2 : 0.5;
 
       originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth * scale / 2);
@@ -125,6 +132,7 @@ shortestCol.appendChild(tile);
       updateTransform();
     });
 
+    // 🧭 GESTIONE ZOOM CON SCROLL
     wrapper.addEventListener('wheel', (e) => {
       e.preventDefault();
       const rect = wrapper.getBoundingClientRect();
@@ -140,6 +148,7 @@ shortestCol.appendChild(tile);
       updateTransform();
     }, { passive: false });
 
+    // 🖱️ GESTIONE PAN
     wrapper.addEventListener('pointerdown', (e) => {
       if (e.pointerType === 'touch' && !e.isPrimary) return;
       isPanning = true;
@@ -161,7 +170,7 @@ shortestCol.appendChild(tile);
       wrapper.style.cursor = 'grab';
     });
 
-    // Pinch-to-zoom mobile
+    // 🤏 PINCH TO ZOOM MOBILE
     let lastTouchDist = null;
     let lastTouchCenter = null;
 
