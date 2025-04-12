@@ -13,14 +13,12 @@
       width: 100%;
       background: #000;
       user-select: none;
-      -webkit-user-select: none;
-      -ms-user-select: none;
       touch-action: none;
       transition: background 0.3s ease;
     }
 
     body.light-mode {
-      background-color: #ffffff;
+      background-color: #fff;
     }
 
     #wrapper {
@@ -63,8 +61,7 @@
       pointer-events: none;
     }
 
-    /* ───────── STICKY BAR ───────── */
-
+    /* ──────── STICKY BAR ──────── */
     #sticky-bar {
       position: fixed;
       bottom: 20px;
@@ -72,37 +69,42 @@
       transform: translateX(-50%);
       background: #ffe100;
       border-radius: 100px;
-      padding: 20px 40px;
+      padding: 14px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-family: monospace;
       z-index: 9999;
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
     }
 
-    #sticky-bar .icons {
+    .icon-group {
       display: flex;
-      flex-direction: column;
+      gap: 32px;
       align-items: center;
+      justify-content: center;
     }
 
-    #sticky-bar .icons > div:first-child {
-      display: flex;
-      gap: 40px;
-      align-items: center;
+    .icon-line {
+      margin-top: 8px;
+      width: 100%;
+      height: auto;
+    }
+
+    .icon-line img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     #sticky-bar a,
     #sticky-bar button {
       all: unset;
       cursor: pointer;
-      line-height: 1;
     }
 
     #sticky-bar img {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       transition: transform 0.2s ease;
     }
 
@@ -110,89 +112,48 @@
       transform: scale(1.2);
     }
 
-    .icon-line {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-    }
-
-    .icon-line img {
-      width: 100%;
-      height: auto;
-      max-width: 100%;
-      object-fit: contain;
-    }
-
-    #sticky-bar .crediti {
-      margin-top: 10px;
-      font-size: 0.6rem;
-      color: #333;
-      text-align: center;
-      max-width: 100%;
-      line-height: 1.2;
-    }
-
     @media (max-width: 768px) {
       #sticky-bar {
-        transform: none;
-        left: 10px;
-        right: 10px;
-        width: calc(100% - 20px);
-        bottom: 10px;
-        padding: 10px 16px;
-        border-radius: 20px;
+        padding: 10px 18px;
       }
 
-      #sticky-bar .icons > div:first-child {
-        gap: 30px;
+      .icon-group {
+        gap: 26px;
       }
 
       #sticky-bar img {
-        width: 28px;
-        height: 28px;
-      }
-
-      #sticky-bar .crediti {
-        display: none;
+        width: 26px;
+        height: 26px;
       }
     }
   </style>
 </head>
-
 <body>
+
   <div id="wrapper">
     <div id="panzoom"></div>
   </div>
 
-  <!-- 🔻 Sticky bar -->
   <div id="sticky-bar">
-    <div class="icons">
-      <div>
-        <a href="mailto:me@girste.com" title="Scrivimi"><img src="mail-icon.svg" alt="Mail"></a>
-        <a href="tel:+393405445704" title="Chiama"><img src="tel-icon.svg" alt="Telefono"></a>
-        <button onclick="location.reload()" title="Ricarica"><img src="ric-icon.svg" alt="Ricarica"></button>
-        <button id="toggle-theme" title="Modalità chiara/scura"><img src="dark-icon.svg" alt="Contrasto"></button>
-        <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
-      </div>
-      <div class="icon-line">
-        <img src="line-icon.svg" alt="Linea decorativa">
-      </div>
+    <div class="icon-group">
+      <a href="mailto:me@girste.com" title="Scrivimi"><img src="mail-icon.svg" alt="Mail"></a>
+      <a href="tel:+393405445704" title="Chiama"><img src="tel-icon.svg" alt="Telefono"></a>
+      <button onclick="location.reload()" title="Ricarica"><img src="ric-icon.svg" alt="Ricarica"></button>
+      <button id="toggle-theme" title="Modalità chiara/scura"><img src="dark-icon.svg" alt="Contrasto"></button>
+      <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
     </div>
-    <div class="crediti">
-      © Stefano Girard, 2025<br>
-      design by Creative Unit – this site does not save any data
+    <div class="icon-line">
+      <img src="line-icon.svg" alt="Linea decorativa">
     </div>
   </div>
 
-  <!-- 🔻 Script -->
   <script>
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
 
     const totalImages = 75;
     const images = Array.from({ length: 77 }, (_, i) => `imgs/img-${i + 1}.webp`)
-                         .filter(name => !["imgs/img-16.webp", "imgs/img-27.webp"].includes(name));
+      .filter(name => !["imgs/img-16.webp", "imgs/img-27.webp"].includes(name));
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -213,23 +174,17 @@
     for (let i = 0; i < totalImages; i++) {
       const imgEl = document.createElement('img');
       imgEl.src = images[i];
-
       const tile = document.createElement('div');
       tile.className = 'tile';
       tile.appendChild(imgEl);
-
-      let shortestCol = columns.reduce((prev, curr) =>
+      const shortestCol = columns.reduce((prev, curr) =>
         prev.offsetHeight < curr.offsetHeight ? prev : curr
       );
       shortestCol.appendChild(tile);
     }
 
-    let scale = 1;
-    let originX = 0;
-    let originY = 0;
-    let isPanning = false;
-    let startX = 0;
-    let startY = 0;
+    let scale = 1, originX = 0, originY = 0, isPanning = false;
+    let startX = 0, startY = 0;
 
     function updateTransform() {
       panzoomEl.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
@@ -249,10 +204,8 @@
       const rect = wrapper.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-
       const delta = -e.deltaY * 0.001;
       const newScale = Math.min(Math.max(0.1, scale * (1 + delta)), 5);
-
       originX -= (mouseX - originX) * (newScale / scale - 1);
       originY -= (mouseY - originY) * (newScale / scale - 1);
       scale = newScale;
@@ -289,7 +242,6 @@
         isPanning = false;
         const rect = wrapper.getBoundingClientRect();
         const [t1, t2] = e.touches;
-
         const dx = t1.clientX - t2.clientX;
         const dy = t1.clientY - t2.clientY;
         const dist = Math.hypot(dx, dy);
@@ -299,13 +251,10 @@
         if (lastTouchDist !== null && lastTouchCenter) {
           const scaleFactor = dist / lastTouchDist;
           const newScale = Math.min(Math.max(0.1, scale * scaleFactor), 5);
-
           originX += centerX - lastTouchCenter.x;
           originY += centerY - lastTouchCenter.y;
-
           originX -= (centerX - originX) * (newScale / scale - 1);
           originY -= (centerY - originY) * (newScale / scale - 1);
-
           scale = newScale;
           updateTransform();
         }
@@ -324,7 +273,7 @@
 
     updateTransform();
 
-    // 🔁 Tema chiaro/scuro
+    // Modalità chiaro/scuro
     const toggleThemeBtn = document.getElementById("toggle-theme");
     toggleThemeBtn.addEventListener("click", () => {
       document.body.classList.toggle("light-mode");
