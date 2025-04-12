@@ -68,7 +68,7 @@
       transform: translateX(-50%);
       background: #ffe100;
       border-radius: 100px;
-      padding: 20px 30px;
+      padding: 18px 26px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -100,17 +100,16 @@
     }
 
     .icon-logo {
-      margin-top: 16px;
-      width: 100%;
+      margin-top: 14px;
       display: flex;
       justify-content: center;
+      align-items: center;
     }
 
     .icon-logo img {
-      width: 220px;
-      max-width: 90vw;
+      width: 240px;           /* larghezza fissa visibile */
       height: auto;
-      object-fit: contain;
+      max-width: 100%;
       display: block;
     }
 
@@ -124,8 +123,8 @@
       }
 
       #sticky-bar img {
-        width: 28px;
-        height: 28px;
+        width: 26px;
+        height: 26px;
       }
 
       .icon-logo img {
@@ -149,7 +148,7 @@
       <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
     </div>
     <div class="icon-logo">
-      <img src="line-icon.svg" alt="Girste's Logo">
+      <img src="line-icon.svg" alt="Girste's logo">
     </div>
   </div>
 
@@ -279,7 +278,6 @@
 
     updateTransform();
 
-    // Modalità chiaro/scuro
     const toggleThemeBtn = document.getElementById("toggle-theme");
     toggleThemeBtn.addEventListener("click", () => {
       document.body.classList.toggle("light-mode");
