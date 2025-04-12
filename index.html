@@ -68,7 +68,7 @@
       transform: translateX(-50%);
       background: #ffe100;
       border-radius: 100px;
-      padding: 18px 26px;
+      padding: 14px 22px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -90,39 +90,70 @@
       cursor: pointer;
     }
 
-    .icon-group img {
+    #sticky-bar img {
       width: 32px;
       height: 32px;
       transition: transform 0.2s ease;
     }
 
-    .icon-group img:hover {
+    #sticky-bar img:hover {
       transform: scale(1.2);
     }
 
+    .icon-logo {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .icon-logo span {
+      font-family: sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: #000;
+      white-space: nowrap;
+    }
+
+    body.light-mode .icon-logo span {
+      color: #000;
+    }
+
+    body:not(.light-mode) .icon-logo span {
+      color: #000;
+    }
+
     .text-image {
-      margin-top: 14px;
+      margin-top: 8px;
       width: 100%;
     }
 
     .text-image img {
+      display: block;
       width: 100%;
       height: auto;
-      display: block;
     }
 
     @media (max-width: 768px) {
       #sticky-bar {
-        padding: 12px 20px;
+        padding: 10px 16px;
       }
 
       .icon-group {
         gap: 24px;
       }
 
-      .icon-group img {
+      #sticky-bar img {
         width: 26px;
         height: 26px;
+      }
+
+      .icon-logo span {
+        font-size: 14px;
+      }
+
+      .text-image {
+        margin-top: 6px;
       }
     }
   </style>
@@ -141,8 +172,11 @@
       <button id="toggle-theme" title="Modalità chiara/scura"><img src="dark-icon.svg" alt="Contrasto"></button>
       <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
     </div>
+    <div class="icon-logo">
+      <span>girste.com — cose sparse in ordine sparso</span>
+    </div>
     <div class="text-image">
-      <img src="text-icon.svg" alt="girste.com — cose sparse in ordine sparso">
+      <img src="text-icon.svg" alt="Testo illustrato">
     </div>
   </div>
 
