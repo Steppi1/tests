@@ -63,8 +63,19 @@
     const wrapper = document.getElementById('wrapper');
     const panzoomEl = document.getElementById('panzoom');
 
-    const images = Array.from({ length: 8 }, (_, i) => `imgs/img ${i + 1}.png`);
-    const totalImages = 400;
+    // Numero totale di immagini generate in webp
+    const totalImages = 60; // <-- cambia qui se ne hai di più
+    const images = Array.from({ length: totalImages }, (_, i) => `imgs/img-${i + 1}.webp`);
+
+    // Shuffle per mescolare l’ordine
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+    shuffle(images);
+
     const numColumns = Math.floor(Math.sqrt(totalImages));
 
     // Crea colonne masonry
@@ -75,13 +86,10 @@
       return col;
     });
 
-    function randomImage() {
-      return images[Math.floor(Math.random() * images.length)];
-    }
-
+    // Inserisci immagini (non ripetute)
     for (let i = 0; i < totalImages; i++) {
       const imgEl = document.createElement('img');
-      imgEl.src = randomImage();
+      imgEl.src = images[i];
 
       const tile = document.createElement('div');
       tile.className = 'tile';
