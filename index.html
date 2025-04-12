@@ -95,7 +95,11 @@
       tile.className = 'tile';
       tile.appendChild(imgEl);
 
-      columns[i % numColumns].appendChild(tile);
+      // Trova la colonna con altezza minore
+let shortestCol = columns.reduce((prev, curr) =>
+  prev.offsetHeight < curr.offsetHeight ? prev : curr
+);
+shortestCol.appendChild(tile);
     }
 
     // Pan e Zoom
