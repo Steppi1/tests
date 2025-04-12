@@ -83,6 +83,12 @@
 
     #sticky-bar .icons {
       display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #sticky-bar .icons > div:first-child {
+      display: flex;
       gap: 40px;
       align-items: center;
     }
@@ -104,6 +110,20 @@
       transform: scale(1.2);
     }
 
+    .icon-line {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .icon-line img {
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
     #sticky-bar .crediti {
       margin-top: 10px;
       font-size: 0.6rem;
@@ -113,7 +133,6 @@
       line-height: 1.2;
     }
 
-    /* Mobile layout */
     @media (max-width: 768px) {
       #sticky-bar {
         transform: none;
@@ -121,11 +140,11 @@
         right: 10px;
         width: calc(100% - 20px);
         bottom: 10px;
-        padding: 15px 20px;
+        padding: 10px 16px;
         border-radius: 20px;
       }
 
-      #sticky-bar .icons {
+      #sticky-bar .icons > div:first-child {
         gap: 30px;
       }
 
@@ -149,11 +168,16 @@
   <!-- 🔻 Sticky bar -->
   <div id="sticky-bar">
     <div class="icons">
-      <a href="mailto:me@girste.com" title="Scrivimi"><img src="mail-icon.svg" alt="Mail"></a>
-      <a href="tel:+393405445704" title="Chiama"><img src="tel-icon.svg" alt="Telefono"></a>
-      <button onclick="location.reload()" title="Ricarica"><img src="ric-icon.svg" alt="Ricarica"></button>
-      <button id="toggle-theme" title="Modalità chiara/scura"><img src="dark-icon.svg" alt="Contrasto"></button>
-      <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
+      <div>
+        <a href="mailto:me@girste.com" title="Scrivimi"><img src="mail-icon.svg" alt="Mail"></a>
+        <a href="tel:+393405445704" title="Chiama"><img src="tel-icon.svg" alt="Telefono"></a>
+        <button onclick="location.reload()" title="Ricarica"><img src="ric-icon.svg" alt="Ricarica"></button>
+        <button id="toggle-theme" title="Modalità chiara/scura"><img src="dark-icon.svg" alt="Contrasto"></button>
+        <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
+      </div>
+      <div class="icon-line">
+        <img src="line-icon.svg" alt="Linea decorativa">
+      </div>
     </div>
     <div class="crediti">
       © Stefano Girard, 2025<br>
@@ -167,30 +191,8 @@
     const panzoomEl = document.getElementById('panzoom');
 
     const totalImages = 75;
-    const images = [
-      "imgs/img-1.webp", "imgs/img-2.webp", "imgs/img-3.webp", "imgs/img-4.webp",
-      "imgs/img-5.webp", "imgs/img-6.webp", "imgs/img-7.webp", "imgs/img-8.webp",
-      "imgs/img-9.webp", "imgs/img-10.webp", "imgs/img-11.webp", "imgs/img-12.webp",
-      "imgs/img-13.webp", "imgs/img-14.webp", "imgs/img-15.webp",
-      // "imgs/img-16.webp", // eliminata
-      "imgs/img-17.webp", "imgs/img-18.webp", "imgs/img-19.webp", "imgs/img-20.webp",
-      "imgs/img-21.webp", "imgs/img-22.webp", "imgs/img-23.webp", "imgs/img-24.webp",
-      "imgs/img-25.webp", "imgs/img-26.webp",
-      // "imgs/img-27.webp", // eliminata
-      "imgs/img-28.webp", "imgs/img-29.webp", "imgs/img-30.webp", "imgs/img-31.webp",
-      "imgs/img-32.webp", "imgs/img-33.webp", "imgs/img-34.webp", "imgs/img-35.webp",
-      "imgs/img-36.webp", "imgs/img-37.webp", "imgs/img-38.webp", "imgs/img-39.webp",
-      "imgs/img-40.webp", "imgs/img-41.webp", "imgs/img-42.webp", "imgs/img-43.webp",
-      "imgs/img-44.webp", "imgs/img-45.webp", "imgs/img-46.webp", "imgs/img-47.webp",
-      "imgs/img-48.webp", "imgs/img-49.webp", "imgs/img-50.webp", "imgs/img-51.webp",
-      "imgs/img-52.webp", "imgs/img-53.webp", "imgs/img-54.webp", "imgs/img-55.webp",
-      "imgs/img-56.webp", "imgs/img-57.webp", "imgs/img-58.webp", "imgs/img-59.webp",
-      "imgs/img-60.webp", "imgs/img-61.webp", "imgs/img-62.webp", "imgs/img-63.webp",
-      "imgs/img-64.webp", "imgs/img-65.webp", "imgs/img-66.webp", "imgs/img-67.webp",
-      "imgs/img-68.webp", "imgs/img-69.webp", "imgs/img-70.webp", "imgs/img-71.webp",
-      "imgs/img-72.webp", "imgs/img-73.webp", "imgs/img-74.webp", "imgs/img-75.webp",
-      "imgs/img-76.webp", "imgs/img-77.webp"
-    ];
+    const images = Array.from({ length: 77 }, (_, i) => `imgs/img-${i + 1}.webp`)
+                         .filter(name => !["imgs/img-16.webp", "imgs/img-27.webp"].includes(name));
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
