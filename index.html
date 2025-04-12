@@ -25,6 +25,7 @@
   font-family: monospace;
   z-index: 9999;
   box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  transition: background 0.3s ease;
 }
 
 #sticky-bar .icons {
@@ -43,7 +44,8 @@
 #sticky-bar img {
   width: 32px;
   height: 32px;
-  transition: transform 0.2s ease;
+  filter: brightness(0); /* nero */
+  transition: transform 0.2s, filter 0.3s ease;
 }
 
 #sticky-bar img:hover {
@@ -59,7 +61,7 @@
   line-height: 1.2;
 }
 
-/* ✅ visibile anche su mobile */
+/* Mobile: solo barra con icone */
 @media (max-width: 768px) {
   #sticky-bar {
     transform: none;
@@ -81,9 +83,27 @@
   }
 
   #sticky-bar .crediti {
-    font-size: 0.55rem;
+    display: none;
   }
 }
+
+/* Modalità chiara */
+body.light-mode {
+  background: #fff;
+}
+
+body.light-mode #sticky-bar img {
+  filter: brightness(0); /* nero su sfondo chiaro */
+}
+
+body:not(.light-mode) {
+  background: #000;
+}
+
+body:not(.light-mode) #sticky-bar img {
+  filter: brightness(0) invert(1); /* bianco su sfondo nero */
+}
+
 
 
 
@@ -397,11 +417,9 @@
 
 
 const toggleThemeBtn = document.getElementById("toggle-theme");
-let darkMode = true;
 
 toggleThemeBtn.addEventListener("click", () => {
-  darkMode = !darkMode;
-  document.body.style.backgroundColor = darkMode ? "#000" : "#fff";
+  document.body.classList.toggle("light-mode");
 });
 
 
