@@ -99,27 +99,19 @@
       transform: scale(1.2);
     }
 
-    .icon-logo {
+    .text-image {
       margin-top: 14px;
       display: flex;
       justify-content: center;
       align-items: center;
+      width: 100%;
     }
 
-    .icon-logo span {
-      font-family: sans-serif;
-      font-size: 16px;
-      font-weight: 500;
-      color: #000;
-      white-space: nowrap;
-    }
-
-    body.light-mode .icon-logo span {
-      color: #000;
-    }
-
-    body:not(.light-mode) .icon-logo span {
-      color: #000;
+    .text-image img {
+      width: 90%;
+      max-width: 440px;
+      height: auto;
+      display: block;
     }
 
     @media (max-width: 768px) {
@@ -136,8 +128,8 @@
         height: 26px;
       }
 
-      .icon-logo span {
-        font-size: 14px;
+      .text-image img {
+        max-width: 300px;
       }
     }
   </style>
@@ -156,8 +148,8 @@
       <button id="toggle-theme" title="Modalità chiara/scura"><img src="dark-icon.svg" alt="Contrasto"></button>
       <a href="/diario" title="Diario"><img src="diar-icon.svg" alt="Diario"></a>
     </div>
-    <div class="icon-logo">
-      <span>girste.com — cose sparse in ordine sparso</span>
+    <div class="text-image">
+      <img src="text-icon.svg" alt="girste.com — cose sparse in ordine sparso">
     </div>
   </div>
 
