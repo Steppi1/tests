@@ -25,7 +25,6 @@
   font-family: monospace;
   z-index: 9999;
   box-shadow: 0 0 20px rgba(0,0,0,0.2);
-  transition: background 0.3s ease;
 }
 
 #sticky-bar .icons {
@@ -44,8 +43,7 @@
 #sticky-bar img {
   width: 32px;
   height: 32px;
-  filter: brightness(0); /* nero */
-  transition: transform 0.2s, filter 0.3s ease;
+  transition: transform 0.2s ease;
 }
 
 #sticky-bar img:hover {
@@ -61,7 +59,7 @@
   line-height: 1.2;
 }
 
-/* Mobile: solo barra con icone */
+/* ✅ Mobile visibile */
 @media (max-width: 768px) {
   #sticky-bar {
     transform: none;
@@ -87,22 +85,9 @@
   }
 }
 
-/* Modalità chiara */
-body.light-mode {
-  background: #fff;
-}
+/* Modalità chiara: cambia solo il background */
+body.light-mode
 
-body.light-mode #sticky-bar img {
-  filter: brightness(0); /* nero su sfondo chiaro */
-}
-
-body:not(.light-mode) {
-  background: #000;
-}
-
-body:not(.light-mode) #sticky-bar img {
-  filter: brightness(0) invert(1); /* bianco su sfondo nero */
-}
 
 
 
@@ -414,14 +399,11 @@ body:not(.light-mode) #sticky-bar img {
 
 
 
-
-
 const toggleThemeBtn = document.getElementById("toggle-theme");
 
 toggleThemeBtn.addEventListener("click", () => {
   document.body.classList.toggle("light-mode");
 });
-
 
 
     
