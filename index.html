@@ -5,6 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Masonry Map Navigation</title>
   <style>
+
+
+#overlay-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+#overlay-bar a, #overlay-bar button {
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font: inherit;
+  padding: 0;
+  margin: 0 5px;
+  transition: opacity 0.2s ease;
+}
+
+#overlay-bar a:hover,
+#overlay-bar button:hover {
+  opacity: 0.7;
+}
+
+
+
     html, body {
       margin: 0;
       padding: 0;
@@ -54,6 +91,9 @@
     }
   </style>
 </head>
+
+
+
 <body>
   <div id="wrapper">
     <div id="panzoom"></div>
@@ -293,6 +333,34 @@
     });
 
     updateTransform();
+
+
+
+
+
+
+const toggleBtn = document.getElementById('toggle-mode');
+let isDark = true;
+
+toggleBtn.addEventListener('click', () => {
+  isDark = !isDark;
+  document.body.style.background = isDark ? '#000' : '#fff';
+});
+
+
+
+
   </script>
+
+
+<div id="overlay-bar">
+  <a href="mailto:me@girste.com">scrivimi</a>
+  <button onclick="location.reload()">ricarica</button>
+  <button id="toggle-mode">modalità chiara/scura</button>
+  <a href="/diario">diario</a>
+</div>
+
+
+
 </body>
 </html>
