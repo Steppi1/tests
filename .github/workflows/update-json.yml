@@ -3,7 +3,7 @@ name: Generate images.json
 on:
   push:
     branches:
-      - main  # si attiva a ogni push su "main"
+      - main
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
 
       - name: Generate images.json
         run: |
-          node generate-json.js
+          node generate-json.cjs
 
       - name: Commit and push if changed
         run: |
