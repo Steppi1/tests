@@ -9,3 +9,6 @@ const files = fs
 const output = files.map(f => `https://raw.githubusercontent.com/Steppi1/tests/main/imgs/${f}`);
 
 fs.writeFileSync("images.json", JSON.stringify(output, null, 2));
+
+
+console.log("images.json generato con", output.length, "immagini.");
