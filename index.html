@@ -1,42 +1,104 @@
 <!DOCTYPE html>
-<html lang="it">
-  <head>
-   
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixel Farm</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #a8d0a5;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+  <script>
+    const config = {
+      type: Phaser.AUTO,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      backgroundColor: '#a8d0a5',
+      physics: {
+        default: 'arcade',
+      },
+      scene: {
+        preload: preload,
+        create: create,
+        update: update,
+      },
+      pixelArt: true,
+    };
 
+    let game = new Phaser.Game(config);
+    let animals = [];
+    let tiles = [];
+    let lastGeneratedX = 0;
 
+    function preload() {
+      // Sprite base temporanei
+      this.load.image('ground', 'https://i.imgur.com/kV2C0JN.png'); // terreno
+      this.load.image('tree', 'https://i.imgur.com/sX2X7A5.png'); // albero
+      this.load.image('chicken', 'https://i.imgur.com/h1W68E4.png'); // pollo
+      this.load.image('house', 'https://i.imgur.com/ZG6Hy1M.png'); // casetta
+    }
 
-    
+    function create() {
+      this.cameras.main.setBounds(0, 0, Number.MAX_SAFE_INTEGER, config.height);
+      this.physics.world.setBounds(0, 0, Number.MAX_SAFE_INTEGER, config.height);
+      this.cameras.main.startFollow({ x: 0, y: config.height / 2 }, true, 0.05, 0.05);
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div id="wrapper">
-      <div id="panzoom"></div>
-    </div>
+      // Genera primo blocco
+      generateChunk(this, 0);
+    }
 
-   <!-- Sticky Yellow Bar -->
-<div id="sticky-bar">
-  <div class="icon-group">
-    <a href="mailto:me@girste.com" title="email"><img src="assets/mail-icon.svg" alt="email" /></a>
-    <a href="tel:+393405445704" title="call"><img src="assets/tel-icon.svg" alt="call" /></a>
-    <button onclick="location.reload()" title="refresh"><img src="assets/ric-icon.svg" alt="refresh" /></button>
-    <button id="toggle-theme" title="bright/dark"><img src="assets/dark-icon.svg" alt="dark/bright" /></button>
-    <a href="/diario" title="texts"><img src="assets/diar-icon.svg" alt="texts" /></a>
-  </div>
-  <div class="icon-footer">
-    <img src="assets/text-icon.svg" alt="Footer Icon" />
-  </div>
-</div>
+    function generateChunk(scene, xStart) {
+      const tileWidth = 64;
+      const chunkSize = 20;
 
+      for (let i = 0; i < chunkSize; i++) {
+        const x = xStart + i * tileWidth;
+        const y = config.height - 64;
+        const ground = scene.add.image(x, y, 'ground').setOrigin(0).setScale(2);
+        tiles.push(ground);
 
+        // Oggetti random
+        const rand = Math.random();
+        if (rand < 0.1) {
+          scene.add.image(x + 16, y - 64, 'tree').setScale(2);
+        } else if (rand < 0.15) {
+          scene.add.image(x + 16, y - 64, 'house').setScale(2);
+        } else if (rand < 0.25) {
+          const chicken = scene.physics.add.image(x + 16, y - 16, 'chicken').setScale(2);
+          chicken.setVelocityX(Phaser.Math.Between(-10, 10));
+          animals.push(chicken);
+        }
+      }
 
+      lastGeneratedX = xStart + chunkSize * tileWidth;
+    }
 
- <!-- BREAK -->
+    function update(time, delta) {
+      const cam = this.cameras.main;
+      cam.scrollX += 0.05; // lento scroll automatico
 
+      // Quando ci avviciniamo al bordo, genera nuova porzione
+      if (cam.scrollX + config.width > lastGeneratedX - 500) {
+        generateChunk(this, lastGeneratedX);
+      }
 
-
-    <!-- JS -->
-    <script src="script.js"></script>
-  </body>
+      // Movimento animale semplice
+      animals.forEach(a => {
+        if (a.x < 0 || a.x > lastGeneratedX) {
+          a.setVelocityX(-a.body.velocity.x); // rimbalza
+        }
+      });
+    }
+  </script>
+</body>
 </html>
