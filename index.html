@@ -68,7 +68,7 @@
       transform: translateX(-50%);
       background: #ffe100;
       border-radius: 100px;
-      padding: 16px 30px 10px;
+      padding: 12px 40px 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -100,20 +100,20 @@
     }
 
     .icon-footer {
-  margin-top: 3px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.icon-footer img {
-  width: 288px;
-  height: auto;
-  display: block;
-}
+      margin-top: 2px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .icon-footer img {
+      height: auto;
+      display: block;
+    }
 
     @media (max-width: 768px) {
       #sticky-bar {
-        padding: 12px 24px 10px;
+        padding: 10px 32px 6px;
       }
 
       .icon-group {
@@ -126,17 +126,17 @@
       }
 
       .icon-footer {
-        margin-top: 10px;
+        margin-top: 2px;
       }
     }
 
     @media (min-width: 769px) {
       #sticky-bar {
-        padding: 10px 24px 8px;
+        padding: 12px 40px 8px;
       }
 
       .icon-footer {
-        margin-top: 8px;
+        margin-top: 2px;
       }
     }
   </style>
@@ -210,6 +210,14 @@
       originX = (wrapper.clientWidth / 2) - (panzoomEl.clientWidth * scale / 2);
       originY = (wrapper.clientHeight / 2) - (panzoomEl.clientHeight * scale / 2);
       updateTransform();
+
+      // Imposta larghezza dinamica dell'icona footer in base al gruppo icone
+      const group = document.querySelector('.icon-group');
+      const footerIcon = document.querySelector('.icon-footer img');
+      if (group && footerIcon) {
+        const groupWidth = group.offsetWidth;
+        footerIcon.style.width = `${groupWidth}px`;
+      }
     });
 
     wrapper.addEventListener('wheel', (e) => {
@@ -284,33 +292,10 @@
       }
     });
 
-    updateTransform();
-
     const toggleThemeBtn = document.getElementById("toggle-theme");
     toggleThemeBtn.addEventListener("click", () => {
       document.body.classList.toggle("light-mode");
     });
-
-
-
-
-
-
-
-    // Imposta larghezza dinamica dell'icona footer in base a icon-group
-window.addEventListener('load', () => {
-  const group = document.querySelector('.icon-group');
-  const footerIcon = document.querySelector('.icon-footer img');
-  if (group && footerIcon) {
-    const groupWidth = group.offsetWidth;
-    footerIcon.style.width = `${groupWidth}px`;
-  }
-});
-
-
-
-
-
   </script>
 </body>
 </html>
