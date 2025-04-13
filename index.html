@@ -40,24 +40,12 @@
     let tiles = [];
     let lastGeneratedX = 0;
 
-    function createColoredRect(scene, color, width = 32, height = 32) {
-      const gfx = scene.make.graphics({ x: 0, y: 0, add: false });
-      gfx.fillStyle(color, 1);
-      gfx.fillRect(0, 0, width, height);
-      const texKey = 'rect-' + color + '-' + width + 'x' + height;
-      gfx.generateTexture(texKey, width, height);
-      gfx.destroy();
-      return texKey;
-    }
-
     function preload() {
-      // Genera rettangoli come placeholder per oggetti
-      this.registry.set('texKeys', {
-        ground: createColoredRect(this, 0x556b2f, 64, 64),
-        tree: createColoredRect(this, 0x228b22, 24, 48),
-        house: createColoredRect(this, 0x8b0000, 32, 32),
-        chicken: createColoredRect(this, 0xffff00, 16, 16),
-      });
+      // Carica SVG come immagini base64
+      this.load.image('ground', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjNTU2YjJmIi8+PC9zdmc+');
+      this.load.image('tree', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCAyNCA0OCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnL3N2ZyI+PHJlY3QgeT0iMjQiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iI0I4NzAiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMiIgZmlsbD0iIzIyOGIyMiIvPjwvc3ZnPg==');
+      this.load.image('house', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjOGIwMDAwIi8+PHJlY3QgeT0iMTYiIHdpZHRoPSIzMiIgaGVpZ2h0PSIxNiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==');
+      this.load.image('chicken', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZmZmMDAwIi8+PGNpcmNsZSBjeD0iNCIgY3k9IjQiIHI9IjIiIGZpbGw9IiNmYjAwMDAiLz48L3N2Zz4=');
     }
 
     function create() {
@@ -71,21 +59,20 @@
     function generateChunk(scene, xStart) {
       const tileWidth = 64;
       const chunkSize = 20;
-      const tex = scene.registry.get('texKeys');
 
       for (let i = 0; i < chunkSize; i++) {
         const x = xStart + i * tileWidth;
         const y = config.height - 64;
-        const ground = scene.add.image(x, y, tex.ground).setOrigin(0);
+        const ground = scene.add.image(x, y, 'ground').setOrigin(0);
         tiles.push(ground);
 
         const rand = Math.random();
         if (rand < 0.1) {
-          scene.add.image(x + 16, y - 48, tex.tree);
+          scene.add.image(x + 16, y - 48, 'tree');
         } else if (rand < 0.15) {
-          scene.add.image(x + 16, y - 32, tex.house);
+          scene.add.image(x + 16, y - 32, 'house');
         } else if (rand < 0.25) {
-          const chicken = scene.physics.add.image(x + 16, y - 16, tex.chicken);
+          const chicken = scene.physics.add.image(x + 16, y - 16, 'chicken');
           chicken.setVelocityX(Phaser.Math.Between(-10, 10));
           animals.push(chicken);
         }
