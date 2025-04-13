@@ -40,12 +40,24 @@
     let tiles = [];
     let lastGeneratedX = 0;
 
+    function createColoredRect(scene, color, width = 32, height = 32) {
+      const gfx = scene.make.graphics({ x: 0, y: 0, add: false });
+      gfx.fillStyle(color, 1);
+      gfx.fillRect(0, 0, width, height);
+      const texKey = 'rect-' + color + '-' + width + 'x' + height;
+      gfx.generateTexture(texKey, width, height);
+      gfx.destroy();
+      return texKey;
+    }
+
     function preload() {
-      // Immagini sostitutive belle e funzionanti (libere da Kenney.nl)
-      this.load.image('ground', 'https://kenney.nl/assets/platformer-art-deluxe/PNG/Tiles/grassCenter.png');
-      this.load.image('tree', 'https://kenney.nl/assets/platformer-art-deluxe/PNG/Trees/treeBrown_large.png');
-      this.load.image('chicken', 'https://kenney.nl/assets/platformer-art-deluxe/PNG/Characters/chicken.png');
-      this.load.image('house', 'https://kenney.nl/assets/platformer-art-deluxe/PNG/Buildings/houseRed.png');
+      // Genera rettangoli come placeholder per oggetti
+      this.registry.set('texKeys', {
+        ground: createColoredRect(this, 0x556b2f, 64, 64),
+        tree: createColoredRect(this, 0x228b22, 24, 48),
+        house: createColoredRect(this, 0x8b0000, 32, 32),
+        chicken: createColoredRect(this, 0xffff00, 16, 16),
+      });
     }
 
     function create() {
@@ -59,20 +71,21 @@
     function generateChunk(scene, xStart) {
       const tileWidth = 64;
       const chunkSize = 20;
+      const tex = scene.registry.get('texKeys');
 
       for (let i = 0; i < chunkSize; i++) {
         const x = xStart + i * tileWidth;
         const y = config.height - 64;
-        const ground = scene.add.image(x, y, 'ground').setOrigin(0).setScale(1);
+        const ground = scene.add.image(x, y, tex.ground).setOrigin(0);
         tiles.push(ground);
 
         const rand = Math.random();
         if (rand < 0.1) {
-          scene.add.image(x + 16, y - 64, 'tree').setScale(0.5);
+          scene.add.image(x + 16, y - 48, tex.tree);
         } else if (rand < 0.15) {
-          scene.add.image(x + 16, y - 64, 'house').setScale(0.5);
+          scene.add.image(x + 16, y - 32, tex.house);
         } else if (rand < 0.25) {
-          const chicken = scene.physics.add.image(x + 16, y - 16, 'chicken').setScale(0.5);
+          const chicken = scene.physics.add.image(x + 16, y - 16, tex.chicken);
           chicken.setVelocityX(Phaser.Math.Between(-10, 10));
           animals.push(chicken);
         }
