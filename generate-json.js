@@ -1,0 +1,11 @@
+const fs = require("fs");
+const path = require("path");
+
+const folder = "./imgs";
+const files = fs
+  .readdirSync(folder)
+  .filter(f => /\.(png|jpe?g|webp|gif|svg)$/i.test(f));
+
+const output = files.map(f => `https://raw.githubusercontent.com/Steppi1/tests/main/imgs/${f}`);
+
+fs.writeFileSync("images.json", JSON.stringify(output, null, 2));
