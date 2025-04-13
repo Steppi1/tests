@@ -41,11 +41,11 @@
     let lastGeneratedX = 0;
 
     function preload() {
-      // Sprite base temporanei
-      this.load.image('ground', 'https://i.imgur.com/kV2C0JN.png'); // terreno
-      this.load.image('tree', 'https://i.imgur.com/sX2X7A5.png'); // albero
-      this.load.image('chicken', 'https://i.imgur.com/h1W68E4.png'); // pollo
-      this.load.image('house', 'https://i.imgur.com/ZG6Hy1M.png'); // casetta
+      // Immagini sostitutive belle e funzionanti (libere da Kenney.nl)
+      this.load.image('ground', 'https://kenney.nl/assets/platformer-art-deluxe/PNG/Tiles/grassCenter.png');
+      this.load.image('tree', 'https://kenney.nl/assets/platformer-art-deluxe/PNG/Trees/treeBrown_large.png');
+      this.load.image('chicken', 'https://kenney.nl/assets/platformer-art-deluxe/PNG/Characters/chicken.png');
+      this.load.image('house', 'https://kenney.nl/assets/platformer-art-deluxe/PNG/Buildings/houseRed.png');
     }
 
     function create() {
@@ -53,7 +53,6 @@
       this.physics.world.setBounds(0, 0, Number.MAX_SAFE_INTEGER, config.height);
       this.cameras.main.startFollow({ x: 0, y: config.height / 2 }, true, 0.05, 0.05);
 
-      // Genera primo blocco
       generateChunk(this, 0);
     }
 
@@ -64,17 +63,16 @@
       for (let i = 0; i < chunkSize; i++) {
         const x = xStart + i * tileWidth;
         const y = config.height - 64;
-        const ground = scene.add.image(x, y, 'ground').setOrigin(0).setScale(2);
+        const ground = scene.add.image(x, y, 'ground').setOrigin(0).setScale(1);
         tiles.push(ground);
 
-        // Oggetti random
         const rand = Math.random();
         if (rand < 0.1) {
-          scene.add.image(x + 16, y - 64, 'tree').setScale(2);
+          scene.add.image(x + 16, y - 64, 'tree').setScale(0.5);
         } else if (rand < 0.15) {
-          scene.add.image(x + 16, y - 64, 'house').setScale(2);
+          scene.add.image(x + 16, y - 64, 'house').setScale(0.5);
         } else if (rand < 0.25) {
-          const chicken = scene.physics.add.image(x + 16, y - 16, 'chicken').setScale(2);
+          const chicken = scene.physics.add.image(x + 16, y - 16, 'chicken').setScale(0.5);
           chicken.setVelocityX(Phaser.Math.Between(-10, 10));
           animals.push(chicken);
         }
@@ -85,17 +83,15 @@
 
     function update(time, delta) {
       const cam = this.cameras.main;
-      cam.scrollX += 0.05; // lento scroll automatico
+      cam.scrollX += 0.05;
 
-      // Quando ci avviciniamo al bordo, genera nuova porzione
       if (cam.scrollX + config.width > lastGeneratedX - 500) {
         generateChunk(this, lastGeneratedX);
       }
 
-      // Movimento animale semplice
       animals.forEach(a => {
         if (a.x < 0 || a.x > lastGeneratedX) {
-          a.setVelocityX(-a.body.velocity.x); // rimbalza
+          a.setVelocityX(-a.body.velocity.x);
         }
       });
     }
