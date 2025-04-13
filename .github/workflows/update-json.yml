@@ -2,8 +2,8 @@ name: Generate images.json
 
 on:
   push:
-    paths:
-      - 'imgs/**'
+    branches:
+      - main  # si attiva a ogni push su "main"
 
 jobs:
   build:
