@@ -4,7 +4,7 @@ export default {
     title: "Stefano – Portfolio",
     author: "Stefano Girard",
     description: "Sketch, progetti e note",
-    siteUrl: "https://tuosito.com"
+    siteUrl: "https://steppi1.github.io/tests/"
   },
   defaultLang: "it",
   contentDir: "content",
