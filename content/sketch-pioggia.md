@@ -1,6 +1,6 @@
 ---
 title: Sketch Pioggia
-tags: [code, js]
+tags: [code]
 ---
 
 Ecco uno sketch interattivo creato in JavaScript.
