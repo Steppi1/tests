@@ -10,3 +10,4 @@ export default {
   contentDir: "content",
   staticDir: "static"
 }
+
