@@ -1,0 +1,11 @@
+{
+  "name": "quartz-site",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "quartz build"
+  },
+  "dependencies": {
+    "quartz": "^4.0.0"
+  }
+}
